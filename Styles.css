@@ -1,0 +1,62 @@
+:root{
+  --bg:#0f172a; --card:#111827; --ink:#f9fafb; --sub:#cbd5e1;
+  --muted:#94a3b8; --line:#1f2937; --brand:#22c55e; --brand-ink:#052e16;
+  --warn:#f59e0b; --hint:#1e293b; --badge:#0b1220;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font:16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+}
+.container{max-width:980px; margin:24px auto; padding:0 16px}
+h1{font-size:28px; margin:0 0 16px}
+h2{font-size:20px; margin:0}
+
+.grid{display:grid; gap:12px; grid-template-columns:repeat(5,minmax(0,1fr)); margin:12px 0 20px}
+.grid.thirds{grid-template-columns:repeat(3,minmax(0,1fr))}
+.grid label{display:flex; flex-direction:column; gap:6px; font-weight:500}
+.grid input, .grid select{padding:10px 12px; background:#0b1220; border:1px solid var(--line); border-radius:10px; color:var(--ink); outline:none}
+.grid input:disabled, .grid select:disabled{opacity:.6}
+
+.card{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px; margin:18px 0}
+.card-header{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:12px}
+.hdr{display:flex; flex-direction:column; gap:6px}
+.muted{color:var(--muted)}
+
+.dose-lines{display:flex; flex-direction:column; gap:10px}
+.dose-line{display:grid; grid-template-columns: 1fr 1fr 1fr 1fr auto; gap:8px; align-items:center}
+.dose-line select, .dose-line input{padding:8px 10px; background:#0b1220; border:1px solid var(--line); border-radius:10px; color:var(--ink)}
+.dose-line .pill{background:var(--badge); border:1px solid var(--line); padding:4px 8px; border-radius:999px; font-size:12px; color:var(--sub)}
+.remove{background:transparent; border:1px solid var(--line); color:var(--sub); padding:6px 10px; border-radius:10px; cursor:pointer}
+.remove:hover{border-color:#334155}
+
+.best-practice{background:#0b1220; border:1px dashed #1e293b; border-radius:12px; padding:12px; color:var(--sub)}
+
+.actions{display:flex; gap:10px; align-items:center; margin:18px 0}
+.btn{border:1px solid var(--line); background:#0b1220; color:var(--ink); padding:10px 14px; border-radius:12px; cursor:pointer}
+.btn.ghost{background:transparent}
+.btn.primary{background:var(--brand); color:var(--brand-ink); border:none; font-weight:700}
+.btn:disabled{opacity:.6; cursor:not-allowed}
+
+.banner{background:#0b1220; border:1px solid #334155; border-radius:10px; padding:10px; color:var(--sub)}
+
+.table{width:100%; border-collapse:separate; border-spacing:0; margin-top:8px}
+.table th, .table td{border-bottom:1px solid #1e293b; padding:10px; text-align:left; vertical-align:top}
+.table thead th{border-bottom:1px solid #334155; color:var(--sub)}
+.table tbody tr:nth-child(odd){background:rgba(255,255,255,.02)}
+.table .bubble{display:inline-block; padding:4px 8px; background:#0b1220; border:1px solid #1e293b; border-radius:999px; font-size:12px; color:var(--sub)}
+
+.footer-notes{margin-top:12px; padding-top:8px; border-top:1px dashed #1e293b}
+.class-footer{color:var(--muted); font-size:14px}
+
+.hint{color:#93c5fd; font-size:13px; background:var(--hint); padding:6px 8px; border-radius:8px; border:1px solid #0b2540}
+.warn{color:#fed7aa}
+
+@media print{
+  body{background:#fff; color:#000}
+  .container{max-width:none}
+  .card, .grid input, .grid select{border-color:#000}
+  .actions, .best-practice, .btn, .banner{display:none !important}
+  .table{font-size:12px}
+}
