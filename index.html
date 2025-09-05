@@ -1,4 +1,3 @@
-
 <!doctype html>
 <html lang="en">
 <head>
@@ -6,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Deprescribing Taper Planner</title>
 
-  <link rel="stylesheet" href="styles.css?v=refactor1">
+  <link rel="stylesheet" href="styles.css?v=print10">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
 </head>
 <body>
@@ -15,114 +14,103 @@
 
     <div class="grid">
       <label>Medicine Class
-        <select id="classSelect">
-          <option value="">Select...</option>
-          <option value="bzra">Benzodiazepine/Z-drug (BZRA)</option>
-          <option value="ppi">Proton Pump Inhibitor (PPI)</option>
-          <option value="opioid_sr">Opioid (SR tablets)</option>
-          <option value="patch_fentanyl">Fentanyl patch</option>
-          <option value="patch_buprenorphine">Buprenorphine patch</option>
-          <option value="pregabalin">Pregabalin</option>
-          <option value="gabapentin">Gabapentin</option>
-          <!-- Antipsychotics kept hidden via JS feature flag -->
-        </select>
+        <select id="classSelect"></select>
       </label>
-
       <label>Medicine
-        <select id="medicineSelect" disabled>
-          <option value="">Select class first</option>
-        </select>
+        <select id="medicineSelect"></select>
       </label>
-
-      <label>Form / Frequency
-        <select id="formSelect" disabled>
-          <option value="">Select medicine</option>
-        </select>
+      <label>Form
+        <select id="formSelect"></select>
       </label>
+    </div>
 
+    <div class="grid">
       <label>Start date
-        <input id="startDate" type="text" placeholder="Select date" />
+        <input id="startDate" class="datepick" placeholder="Select date" />
       </label>
-
-      <label>Review date (optional)
-        <input id="reviewDate" type="text" placeholder="Select date" />
+      <label>Next review date (optional)
+        <input id="reviewDate" class="datepick" placeholder="Select date" />
       </label>
     </div>
 
     <section class="card">
-      <div class="card-header">
+      <div class="card-head">
         <h2>Dose lines</h2>
-        <button id="addDoseLineBtn" class="btn">+ Add dose line</button>
+        <button id="addDoseLineBtn" type="button" class="secondary">Add Dose Line</button>
       </div>
       <div id="doseLinesContainer" class="dose-lines"></div>
-      <div class="hint">Edit only: <b>Strength</b>, <b>Number of doses</b>, <b>Frequency</b>. Max 4 oral doses per day.</div>
+<p class="hint">Only <strong>Strength</strong>, <strong>Number of doses</strong> and <strong>Frequency</strong> can be changed.</p>
     </section>
 
     <section class="card">
-      <div class="card-header">
-        <h2>Suggested practice (always shown)</h2>
-      </div>
-      <div id="bestPracticeBox" class="best-practice">
-        <p class="muted">Placeholder text. This panel can later be populated from a JSON file without changing code.</p>
-      </div>
+      <div id="bestPracticeBox"></div>
     </section>
 
-    <section class="card">
-      <div class="card-header">
-        <h2>Phases</h2>
-      </div>
+<section class="card">
+<h2>Taper controls</h2>
 
-      <div class="grid thirds">
-        <label>Phase 1: Reduce by (%)
-          <input id="p1Percent" type="number" min="1" max="100" step="1" placeholder="e.g., 25" />
-        </label>
-        <label>Every (days)
-          <input id="p1Interval" type="number" min="1" step="1" placeholder="e.g., 7" />
-        </label>
-        <div class="spacer"></div>
-      </div>
+<div class="taper-block">
+  <h3>Phase 1</h3>
+  <div class="taper-row">
+    <label class="inline-label">
+      <span>Reduce by (%):</span>
+      <input id="p1Percent" type="number" min="1" max="100" placeholder="%" />
+    </label>
+    <label class="inline-label">
+      <span>Every (days):</span>
+      <input id="p1Interval" type="number" min="1" placeholder="days" />
+    </label>
+  </div>
 
-      <div class="grid thirds">
-        <label>Phase 2 start (optional)
-          <input id="p2StartDate" type="text" placeholder="Select date" />
-        </label>
-        <label>Phase 2: Reduce by (%)
-          <input id="p2Percent" type="number" min="1" max="100" step="1" placeholder="e.g., 25" />
-        </label>
-        <label>Every (days)
-          <input id="p2Interval" type="number" min="1" step="1" placeholder="e.g., 7" />
-        </label>
-      </div>
-      <div id="phaseBanner" class="banner" style="display:none"></div>
-    </section>
+  <h3>Phase 2 <span class="muted">(optional)</span></h3>
+  <div class="taper-row">
+    <label class="inline-label">
+      <span>Start Phase 2 from:</span>
+      <input id="p2StartDate" class="datepick" placeholder="DD/MM/YYYY" />
+    </label>
+    <label class="inline-label">
+      <span>Reduce by (%):</span>
+      <input id="p2Percent" type="number" min="1" max="100" placeholder="%" />
+    </label>
+    <label class="inline-label">
+      <span>Every (days):</span>
+      <input id="p2Interval" type="number" min="1" placeholder="days" />
+    </label>
+  </div>
 
-    <section class="actions">
-      <button id="generateBtn" class="btn primary" disabled>Generate</button>
-      <button id="printBtn" class="btn" disabled>Print</button>
-      <button id="savePdfBtn" class="btn" disabled>Save PDF</button>
-      <button id="resetBtn" class="btn ghost">Reset</button>
-    </section>
+  <p class="hint">
+    If Phase 2 is partially complete or empty, only a single-phase taper will generate.
+    Hard limit: 3 months (or review date, if earlier).
+  </p>
+</div>
 
-    <section id="outputCard" class="card" style="display:none">
-      <div class="card-header">
-        <div class="hdr">
-          <h2 id="hdrMedicine">Taper plan</h2>
-          <div id="hdrSpecial" class="muted"></div>
-        </div>
-      </div>
+  <div class="actions">
+    <button id="generateBtn" type="button">Generate Chart</button>
+    <button id="printBtn" type="button" class="secondary">Print</button>
+    <button id="savePdfBtn" type="button" class="secondary">Save as PDF…</button>
+    <button id="resetBtn" type="button" class="ghost">Reset</button>
+  </div>
+</section>
 
-      <div id="scheduleBlock"></div>
-      <div id="patchBlock" style="display:none"></div>
+ <section id="outputCard" class="card output">
+  <div class="output-head">
+    <h2 id="hdrMedicine">Medicine:</h2>
+    <div id="hdrSpecial" class="pill"></div>
+  </div>
 
-      <div class="footer-notes">
-        <div id="classFooter" class="class-footer"></div>
-      </div>
-    </section>
+  <div id="scheduleBlock"></div>
+  <div id="patchBlock" style="display:none"></div>
+
+  <!-- INSERT THIS FOOTER RIGHT HERE -->
+  <div class="footer-notes">
+    <div id="classFooter" class="class-footer"></div>
+  </div>
+</section>
 
   </main>
 
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
-<script src="script.js?v=refactor1"></script>
+<script src="script.js?v=print10"></script>
 </body>
 </html>
