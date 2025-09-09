@@ -169,6 +169,61 @@ function nounForGabapentinByStrength(form, med, strengthStr){
   return (typeof doseFormNoun === "function") ? doseFormNoun(form) : "Units";
 }
 
+// Selected formulations (by mg base). Empty Set => "use all".
+let SelectedFormulations = new Set();
+
+function shouldShowProductPicker(cls, med, form){
+  // Limit to the medicines you specified
+  const isOpioidSR = cls === "Opioid" && /SR/i.test(form) && /Tablet/i.test(form);
+  const allowList = [
+    // Opioids SR tablet
+    ["Opioid","Morphine",/SR/i],
+    ["Opioid","Oxycodone",/SR/i],
+    ["Opioid","Oxycodone \/ Naloxone",/SR/i],
+    ["Opioid","Tapentadol",/SR/i],
+    ["Opioid","Tramadol",/SR/i],
+    // Gabapentinoids
+    ["Gabapentinoids","Gabapentin",/.*/],
+    ["Gabapentinoids","Pregabalin",/Capsule/i]
+  ];
+
+  return allowList.some(([c,m,formRe]) =>
+    c===cls && new RegExp(m,"i").test(med||"") && formRe.test(form||"")
+  );
+}
+
+// Build a nice per-product label
+function strengthToProductLabel(cls, med, form, strengthStr){
+  const mg = parseMgFromStrength(strengthStr);
+
+  // Special pair label for oxycodone/naloxone SR tablet
+  if (/Oxycodone\s*\/\s*Naloxone/i.test(med)) {
+    return oxyNxPairLabel(mg); // e.g. "Oxycodone 20 mg + naloxone 10 mg SR tablet"
+  }
+
+  // Gabapentin shows Capsule vs Tablet by strength
+  if (med === "Gabapentin" && /Tablet\/Capsule/i.test(form)) {
+    const df = (window.GABA_FORM_BY_STRENGTH && GABA_FORM_BY_STRENGTH[mg]) || "Capsule";
+    return `${med} ${stripZeros(mg)} mg ${df}`;
+  }
+
+  // Everyone else: keep your “SR Tablet”/“Tablet”/“Capsule” suffix logic
+  return `${med} ${stripZeros(mg)} mg ${formSuffixWithSR(form)}`;
+}
+
+// Which strengths are available for the picker (we use whatever the current Form provides)
+// For Gabapentin you already expose both tablet & capsule strengths via “Tablet/Capsule”.
+function strengthsForPicker(){
+  return strengthsForSelected().slice().sort((a,b)=>parseMgFromStrength(a)-parseMgFromStrength(b));
+}
+
+// Filtered bases depending on checkbox selection (empty => all)
+function allowedStrengthsFilteredBySelection(){
+  const all = strengthsForSelected().map(parseMgFromStrength).filter(v=>v>0);
+  if (!SelectedFormulations || SelectedFormulations.size === 0) return all;
+  return all.filter(mg => SelectedFormulations.has(mg));
+}
+
 
 // --- PRINT DECORATIONS (header, colgroup, zebra fallback, nowrap units) ---
 
@@ -1806,23 +1861,18 @@ function updateRecommended(){
 /* =================== Math / composition =================== */
 
 function allowedPiecesMg(cls, med, form){
-  // If the user picked specific products (form + strength), use only those mg;
-  // otherwise fall back to the existing per-form strengths.
-  const picked = selectedProductMgs();
-  const baseMgs = (picked && picked.length
-    ? picked
-    : strengthsForSelected().map(parseMgFromStrength)
-  ).filter(v => v > 0);
+  // 1) Start from filtered base strengths
+  const base = allowedStrengthsFilteredBySelection().filter(v=>v>0);
 
-  const uniq = [...new Set(baseMgs)].sort((a,b)=>a-b);
+  // 2) Build piece sizes with splitting rules (unchanged)
+  const uniq=[...new Set(base)].sort((a,b)=>a-b);
   let pieces = uniq.slice();
-
-  const split = canSplitTablets(cls, form, med);
-  if (split.half)    uniq.forEach(v => pieces.push(+(v/2).toFixed(3)));
-  if (split.quarter) uniq.forEach(v => pieces.push(+(v/4).toFixed(3)));
-
+  const split = canSplitTablets(cls,form,med);
+  if(split.half)   uniq.forEach(v=>pieces.push(+(v/2).toFixed(3)));
+  if(split.quarter)uniq.forEach(v=>pieces.push(+(v/4).toFixed(3)));
   return [...new Set(pieces)].sort((a,b)=>a-b);
 }
+
 
 function lowestStepMg(cls, med, form){
   if(cls==="Benzodiazepines / Z-Drug (BZRA)" && /Zolpidem/i.test(med) && isMR(form)) return 6.25;
@@ -2170,6 +2220,67 @@ const doStep = (phasePct) => {
   setDirty(false);
   return rows;
 }
+function renderProductPicker(){
+  const cls  = $("classSelect")?.value || "";
+  const med  = $("medicineSelect")?.value || "";
+  const form = $("formSelect")?.value || "";
+
+  const card = $("productPickerCard");
+  const host = $("productPicker");
+  if (!card || !host) return;
+
+  // Show/hide based on rules
+  if (!shouldShowProductPicker(cls, med, form)) {
+    card.style.display = "none";
+    SelectedFormulations.clear();
+    return;
+  }
+  card.style.display = "";
+
+  // Rebuild checkboxes
+  host.innerHTML = "";
+  const strengths = strengthsForPicker();
+
+  strengths.forEach(s => {
+    const mg = parseMgFromStrength(s);
+    const id = `prod_${String(med).replace(/\W+/g,'_')}_${mg}`;
+
+    const wrap = document.createElement("div");
+    wrap.className = "product-pill";
+
+    const cb = document.createElement("input");
+    cb.type = "checkbox";
+    cb.id = id;
+    cb.checked = SelectedFormulations.size === 0 ? false : SelectedFormulations.has(mg);
+    cb.addEventListener("change", () => {
+      // If user ticks any checkbox, we begin filtering
+      if (cb.checked) SelectedFormulations.add(mg);
+      else SelectedFormulations.delete(mg);
+      setDirty(true);
+    });
+
+    const lab = document.createElement("label");
+    lab.setAttribute("for", id);
+    const title = strengthToProductLabel(cls, med, form, s);
+    lab.innerHTML = `<strong>${title}</strong>`;
+
+    wrap.appendChild(cb);
+    wrap.appendChild(lab);
+    host.appendChild(wrap);
+  });
+
+  // Clear button
+  const clearBtn = $("clearProductSelection");
+  if (clearBtn && !clearBtn._wired) {
+    clearBtn._wired = true;
+    clearBtn.addEventListener("click", () => {
+      SelectedFormulations.clear();
+      // Untick all
+      host.querySelectorAll("input[type=checkbox]").forEach(cb => cb.checked = false);
+      setDirty(true);
+    });
+  }
+}
 
 /* =================== Patches builder — date-based Phase-2; start at step 2 =================== */
 
@@ -2511,10 +2622,20 @@ function buildPlan(){
 }
 
 function updateRecommendedAndLines(){
-  populateMedicines(); populateForms(); updateRecommended(); applyPatchIntervalAttributes(); resetDoseLinesToLowest();
+  populateMedicines(); 
+  populateForms(); 
+  updateRecommended(); 
+  applyPatchIntervalAttributes(); 
+  resetDoseLinesToLowest();
+
+  // NEW: rebuild product picker & clear previous selections on med/form change
+  SelectedFormulations.clear();
+  renderProductPicker();
+
   setFooterText($("classSelect")?.value);
   setDirty(true);
 }
+
 
 //#endregion
 //#region 11. Boot / Init
