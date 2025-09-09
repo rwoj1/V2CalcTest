@@ -223,7 +223,38 @@ function allowedStrengthsFilteredBySelection(){
   if (!SelectedFormulations || SelectedFormulations.size === 0) return all;
   return all.filter(mg => SelectedFormulations.has(mg));
 }
+// Returns the mg list to use for the step size: if user selected formulations, use those;
+// otherwise use all available strengths for the current selection.
+function stepBaseStrengthsMg(cls, med, form){
+  const picked = selectedProductMgs();
+  let mgList = picked && picked.length
+    ? picked.slice()
+    : strengthsForSelectedSafe(cls, med, form);
 
+  mgList = [...new Set(mgList)].filter(v => v > 0).sort((a,b)=>a-b);
+  if (mgList.length) return mgList;
+
+  // Last-ditch fallbacks per medicine (keeps the app moving)
+  if (/^Gabapentin$/i.test(med)) return [100];
+  if (/^Pregabalin$/i.test(med)) return [25];
+  return [5]; // generic (SR opioids usually have 5 mg somewhere)
+}
+
+// Effective step size = smallest base strength in use (selected or all)
+function lowestStepMg(cls, med, form){
+  const mgList = stepBaseStrengthsMg(cls, med, form);
+  return (mgList && mgList.length) ? mgList[0] : 5;
+}
+
+// Snap a %-reduced target to the effective step size.
+// Policy: round UP to avoid under-dose; if unchanged, nudge down by one step for progress.
+function snapTargetToSelection(totalMg, percent, cls, med, form){
+  const step = lowestStepMg(cls, med, form);
+  const raw  = totalMg * (1 - percent/100);
+  let target = Math.ceil(raw / step) * step;         // round ↑ to what’s actually buildable
+  if (target === totalMg && totalMg > 0) target = Math.max(0, totalMg - step); // ensure progress
+  return { target, step };
+}
 
 // --- PRINT DECORATIONS (header, colgroup, zebra fallback, nowrap units) ---
 
@@ -886,9 +917,22 @@ function allCommercialProductsForSelected(){
 
 // Read current selection (returns array of mg if any selected, else null -> use default)
 function selectedProductMgs(){
-  const sel = PRODUCT_SELECTION[currentKey()];
-  if (!sel || !sel.size) return null;
-  return Array.from(sel).map(k => parseInt(k.split("::")[1], 10)).filter(Number.isFinite);
+  // We store selected base strengths (mg) in a Set. If empty → null (use all).
+  if (!window.SelectedFormulations || SelectedFormulations.size === 0) return null;
+  return Array.from(SelectedFormulations).filter(n => Number.isFinite(n) && n > 0);
+}
+function strengthsForSelectedSafe(cls, med, form){
+  try {
+    if (typeof strengthsForSelected === "function") {
+      return strengthsForSelected().map(parseMgFromStrength).filter(v => v > 0);
+    }
+    // Fallback to CATALOG if needed
+    const cat = (window.CATALOG?.[cls]?.[med]) || {};
+    const arr = (cat && (cat[form] || Object.values(cat).flat())) || [];
+    return arr.map(parseMgFromStrength).filter(v => v > 0);
+  } catch (_) {
+    return [];
+  }
 }
 function renderProductPicker(){
   const clsEl  = document.getElementById("classSelect");
@@ -1958,36 +2002,50 @@ function preferredBidTargets(total, cls, med, form){
   return {AM:am, PM:pm};
 }
 
-/* ===== Opioids (tablets) — shave DIN→MID then BID ===== */
+/* ===== Opioids (tablets/capsules) — shave DIN→MID, then rebalance BID ===== */
 function stepOpioid_Shave(packs, percent, cls, med, form){
-  const strengths=strengthsForSelected().map(parseMgFromStrength).filter(v=>v>0).sort((a,b)=>a-b);
-  const step=strengths[0]||1;
-  const tot=packsTotalMg(packs); if(tot<=EPS) return packs;
-  let target = roundTo(tot*(1-percent/100), step);
-  if(target===tot && tot>0){ target=Math.max(0, tot-step); target=roundTo(target,step); }
+  const tot = packsTotalMg(packs);
+  if (tot <= EPS) return packs;
+
+  // Respect selected products for rounding granularity
+  const step = lowestStepMg(cls, med, form) || 1;
+
+  let target = roundTo(tot * (1 - percent/100), step);
+  if (target === tot && tot > 0) {
+    target = Math.max(0, tot - step);
+    target = roundTo(target, step);
+  }
+
+  let cur = {
+    AM:  slotTotalMg(packs, "AM"),
+    MID: slotTotalMg(packs, "MID"),
+    DIN: slotTotalMg(packs, "DIN"),
+    PM:  slotTotalMg(packs, "PM")
+  };
+
   let reduce = +(tot - target).toFixed(3);
 
-  let cur = { AM: slotTotalMg(packs,"AM"), MID: slotTotalMg(packs,"MID"), DIN: slotTotalMg(packs,"DIN"), PM: slotTotalMg(packs,"PM") };
-
-  const shave = (slot)=>{
-    if(reduce<=EPS || cur[slot]<=EPS) return;
+  const shave = (slot) => {
+    if (reduce <= EPS || cur[slot] <= EPS) return;
     const can = cur[slot];
     const dec = Math.min(can, roundTo(reduce, step));
     cur[slot] = +(cur[slot] - dec).toFixed(3);
-    reduce = +(reduce - dec).toFixed(3);
+    reduce    = +(reduce    - dec).toFixed(3);
   };
 
-  const hasDIN = cur.DIN>EPS;
-  if(hasDIN){ shave("DIN"); shave("MID"); }
-  else { shave("MID"); }
+  // Same path you already use elsewhere for SR-style classes:
+  if (cur.DIN > EPS) { shave("DIN"); shave("MID"); }
+  else               { shave("MID"); }
 
-  if(reduce>EPS){
-    const bidTarget = +(cur.AM + cur.PM - reduce).toFixed(3);
+  if (reduce > EPS) {
+    const bidTarget = Math.max(0, +(cur.AM + cur.PM - reduce).toFixed(3));
     const bid = preferredBidTargets(bidTarget, cls, med, form);
-    cur.AM = bid.AM; cur.PM = bid.PM; reduce = 0;
+    cur.AM = bid.AM; cur.PM = bid.PM;
+    reduce = 0;
   }
 
-  for(const k of ["AM","MID","DIN","PM"]) if(cur[k]<EPS) cur[k]=0;
+  for (const k of ["AM","MID","DIN","PM"]) if (cur[k] < EPS) cur[k] = 0;
+
   return recomposeSlots(cur, cls, med, form);
 }
 
@@ -2040,99 +2098,111 @@ function stepAP(packs, percent, med, form){
   return recomposeSlots(cur, "Antipsychotic", med, form);
 }
 
-/* ===== Gabapentinoids ===== */
+/* ===== Gabapentinoids — Gabapentin: DIN→(MID)→rebalance TID | Pregabalin: DIN→MID→rebalance BID ===== */
 function stepGabapentinoid(packs, percent, med, form){
   const cls = "Gabapentinoids";
   const tot = packsTotalMg(packs);
   if (tot <= EPS) return packs;
 
-  // --- Step size from available strengths (fallbacks by medicine) ---
-  const parse = (typeof parseMgFromStrength === "function")
-    ? parseMgFromStrength
-    : (s) => parseFloat(String(s).replace(/[^\d.]/g, "")) || 0;
+  // Round targets to the lowest step permitted by the user's selected products
+  const step = lowestStepMg(cls, med, form) || 1;
 
-  const strengths = (typeof strengthsForSelected === "function" ? strengthsForSelected() : [])
-    .map(parse).filter(v => v > 0).sort((a,b)=>a-b);
+  let target = roundTo(tot * (1 - percent/100), step);
+  if (target === tot && tot > 0) {               // ensure forward progress
+    target = Math.max(0, tot - step);
+    target = roundTo(target, step);
+  }
 
-  const step = strengths[0] || (/^Gabapentin$/i.test(med) ? 100 : 25);
-  const roundStep = (x) => (typeof roundTo === "function") ? roundTo(x, step) : Math.round(x/step)*step;
-
-  // --- Rounded daily target (prefer rounding up; nudge if unchanged) ---
-  const raw = tot * (1 - percent/100);
-  let target = roundStep(raw);                 // e.g., 3200→2880→**2900**
-  if (target === tot && tot > 0) target = Math.max(0, tot - step);
-  if (target <= 0) return { AM:{}, MID:{}, DIN:{}, PM:{} };
-
-  // --- Current mg per slot ---
-  const slotMg = (obj) => {
-    if (!obj) return 0;
-    return Object.entries(obj).reduce((s,[mg,q]) => s + (Number(mg)||0) * (q||0), 0);
+  // Current slot totals
+  let cur = {
+    AM:  slotTotalMg(packs, "AM"),
+    MID: slotTotalMg(packs, "MID"),
+    DIN: slotTotalMg(packs, "DIN"),
+    PM:  slotTotalMg(packs, "PM")
   };
-  let am0  = slotMg(packs.AM);
-  let mid0 = slotMg(packs.MID);
-  let din0 = slotMg(packs.DIN);
-  let pm0  = slotMg(packs.PM);
 
-  let shaveLeft = Math.max(0, tot - target);
-  const isGabapentin  = /^Gabapentin$/i.test(med);
-  const isPregabalin  = !isGabapentin;
+  let reduce = +(tot - target).toFixed(3);
 
-  // ===== QID-aware shave (SR-opioid style) =====
-  // If baseline is QID (anything in DIN), shave DIN first; for pregabalin also MID next.
-  const baselineQID = din0 > 0; // practical detection
-  if (baselineQID) {
-    // 1) DIN-first shave
-    if (shaveLeft > 0 && din0 > 0) {
-      const shaveDIN = Math.min(shaveLeft, din0);
-      // round the shave to step (ensure we keep multiples we can actually compose)
-      const shaved = Math.floor(shaveDIN / step) * step;
-      din0      -= shaved;
-      shaveLeft -= shaved;
-    }
+  // Shave helper (quantised to 'step')
+  const shave = (slot) => {
+    if (reduce <= EPS || cur[slot] <= EPS) return;
+    const can = cur[slot];
+    const dec = Math.min(can, roundTo(reduce, step));
+    cur[slot] = +(cur[slot] - dec).toFixed(3);
+    reduce    = +(reduce    - dec).toFixed(3);
+  };
 
-    if (isPregabalin) {
-      // 2) Then MID (pregabalin only)
-      if (shaveLeft > 0 && mid0 > 0) {
-        const shaveMID = Math.min(shaveLeft, mid0);
-        const shaved   = Math.floor(shaveMID / step) * step;
-        mid0      -= shaved;
-        shaveLeft -= shaved;
+  // ---------- Branch by medicine ----------
+  const isGaba = /gabapentin/i.test(med);
+  const isPreg = /pregabalin/i.test(med);
+
+  if (isGaba) {
+    // Rule: reduce DIN first; if needed reduce MID; then rebalance across TID (AM/MID/PM) with PM taking the remainder.
+    if (cur.DIN > EPS) shave("DIN");
+    if (reduce > EPS && cur.MID > EPS) shave("MID");
+
+    if (reduce > EPS || true) {
+      // Compute TID target and split with PM taking the remainder.
+      const tidTotal = Math.max(0, +(cur.AM + cur.MID + cur.PM - reduce).toFixed(3));
+
+      // Preferred TID split using 'step', PM carries the remainder.
+      const base = Math.max(0, tidTotal - 2*step); // start safe, adjust below
+      let am  = Math.floor((tidTotal / 3) / step) * step;
+      let mid = am;
+      let pm  = tidTotal - am - mid;
+
+      // Quantise and nudge so AM/MID are <= PM, and all are multiples of step
+      am  = roundTo(am,  step);
+      mid = roundTo(mid, step);
+      pm  = roundTo(pm,  step);
+
+      // Fix any rounding drift by pushing difference to PM
+      let sum = am + mid + pm;
+      if (Math.abs(sum - tidTotal) > EPS) {
+        const diff = tidTotal - sum;
+        pm = roundTo(pm + diff, step);
       }
+
+      // Guard against tiny negatives
+      if (am  < EPS) am  = 0;
+      if (mid < EPS) mid = 0;
+      if (pm  < EPS) pm  = 0;
+
+      cur.AM  = am;
+      cur.MID = mid;
+      cur.PM  = pm;
+      cur.DIN = 0;
+      reduce  = 0;
     }
+  } else if (isPreg) {
+    // Rule: reduce DIN first, then MID; then rebalance BID across AM/PM (PM takes the remainder).
+    if (cur.DIN > EPS) shave("DIN");
+    if (reduce > EPS && cur.MID > EPS) shave("MID");
 
-    // If the DIN/MID shave alone achieves (or slightly exceeds) the rounded target,
-    // keep the remaining slots as-is (QID or TID depending on din0).
-    const totAfterShave = am0 + mid0 + din0 + pm0;
-    if (shaveLeft <= 0 || totAfterShave <= target) {
-      // If DIN went to zero, it naturally becomes TID; otherwise remains QID.
-      return recomposeSlots({ AM:am0, MID:mid0, DIN:din0, PM:pm0 }, cls, med, form);
+    if (reduce > EPS) {
+      const bidTarget = Math.max(0, +(cur.AM + cur.PM - reduce).toFixed(3));
+      const bid = preferredBidTargets(bidTarget, cls, med, form); // uses lowestStepMg internally
+      cur.AM = bid.AM;
+      cur.PM = bid.PM;
+      cur.MID = 0; // after shaving MID we end in BID shape
+      reduce = 0;
     }
-    // Otherwise, fall through to class split for the residual shave.
-  }
-
-  // ===== Class split if more reduction is needed (or not QID) =====
-  if (isGabapentin) {
-    // ---- Gabapentin: TID centre-light ----
-    // Base = floor(target/3) to step; remainder to PM, then AM (keeps MID light, AM≈PM).
-    const base = Math.floor((target / 3) / step) * step;
-    let am  = base, mid = base, pm = base;
-
-    let rem = target - (am + mid + pm);
-    while (rem >= step) { pm += step; rem -= step; if (rem >= step) { am += step; rem -= step; } }
-
-    // Tiny total → night only (e.g., 100 mg)
-    if (am === 0 && mid === 0 && pm > 0) {
-      return recomposeSlots({ AM:0, MID:0, DIN:0, PM:pm }, cls, med, form);
-    }
-    return recomposeSlots({ AM:am, MID:mid, DIN:0, PM:pm }, cls, med, form);
-
   } else {
-    // ---- Pregabalin: BID with PM ≥ AM ----
-    let am = roundStep(target / 2);
-    let pm = target - am;
-    if (am > pm) { const t = am; am = pm; pm = t; }
-    return recomposeSlots({ AM:am, MID:0, DIN:0, PM:pm }, cls, med, form);
+    // Fallback (shouldn't hit, but keep safe): behave like opioids SR
+    if (cur.DIN > EPS) shave("DIN");
+    if (reduce > EPS) shave("MID");
+    if (reduce > EPS) {
+      const bidTarget = Math.max(0, +(cur.AM + cur.PM - reduce).toFixed(3));
+      const bid = preferredBidTargets(bidTarget, cls, med, form);
+      cur.AM = bid.AM; cur.PM = bid.PM; reduce = 0;
+    }
   }
+
+  // Clean up float dust
+  for (const k of ["AM","MID","DIN","PM"]) if (cur[k] < EPS) cur[k] = 0;
+
+  // Compose into actual products permitted by the current selection
+  return recomposeSlots(cur, cls, med, form);
 }
 
 /* ===== BZRA ===== */
