@@ -762,6 +762,150 @@ function distributeGabapentinTDS(unitsArr, perSlotCap) {
 
   return out;
 }
+// ---------- Product picker state (session-only) ----------
+const PRODUCT_SELECTION = Object.create(null); // key: `${class}|${med}` -> Set of "Form::mg"
+
+// Which medicines/forms show a picker
+const PRODUCT_PICKER_ALLOW = {
+  "Morphine":            ["Slow Release Tablet","SR Tablet","CR Tablet"],
+  "Oxycodone":           ["Slow Release Tablet","SR Tablet","CR Tablet"],
+  "Oxycodone/Naloxone":  ["Slow Release Tablet","SR Tablet","CR Tablet"],
+  "Tapentadol":          ["Slow Release Tablet","SR Tablet","CR Tablet"],
+  "Tramadol":            ["Slow Release Tablet","SR Tablet","CR Tablet"],
+  "Gabapentin":          ["Capsule","Tablet","Tablet/Capsule"],
+  "Pregabalin":          ["Capsule"]
+};
+
+const currentKey = () => {
+  const cls = document.getElementById("classSelect")?.value || "";
+  const med = document.getElementById("medicineSelect")?.value || "";
+  return `${cls}|${med}`;
+};
+
+const isPickerEligible = () => {
+  const med = document.getElementById("medicineSelect")?.value || "";
+  return !!PRODUCT_PICKER_ALLOW[med];
+};
+
+// Gabapentin: strength uniquely implies form
+function gabapentinFormForMg(mg){
+  mg = +mg;
+  if (mg===600 || mg===800) return "Tablet";
+  if (mg===100 || mg===300 || mg===400) return "Capsule";
+  return "Tablet";
+}
+
+// Build the list of commercial products (form + strength) for the selected medicine
+function allCommercialProductsForSelected(){
+  const cls = document.getElementById("classSelect")?.value || "";
+  const med = document.getElementById("medicineSelect")?.value || "";
+  const allow = PRODUCT_PICKER_ALLOW[med] || [];
+  const cat = (window.CATALOG?.[cls]?.[med]) || {}; // { form: [mg,...] }
+
+  const list = [];
+  for (const [formLabel, strengths] of Object.entries(cat)){
+    // allow only specific forms per medicine
+    const ok = allow.some(a => formLabel.toLowerCase().includes(a.toLowerCase()));
+    if (!ok) continue;
+
+    strengths.forEach(mg => {
+      let f = formLabel;
+      if (/Gabapentin/i.test(med) && /Tablet\s*\/\s*Capsule/i.test(formLabel)) {
+        f = gabapentinFormForMg(mg);
+      }
+      list.push({ form: f, mg: +mg });
+    });
+  }
+  // de-dup (in case mapping produced duplicates)
+  const seen = new Set(), dedup = [];
+  for (const p of list){
+    const k = `${p.form}::${p.mg}`;
+    if (!seen.has(k)) { seen.add(k); dedup.push(p); }
+  }
+  // Sort by form then mg
+  dedup.sort((a,b)=> (a.form.localeCompare(b.form) || (a.mg - b.mg)));
+  return dedup;
+}
+
+// Read current selection (returns array of mg if any selected, else null -> use default)
+function selectedProductMgs(){
+  const sel = PRODUCT_SELECTION[currentKey()];
+  if (!sel || !sel.size) return null;
+  return Array.from(sel).map(k => parseInt(k.split("::")[1], 10)).filter(Number.isFinite);
+}
+function renderProductPicker(){
+  const card = document.getElementById("productPickerCard");
+  const host = document.getElementById("productPicker");
+  if (!card || !host) return;
+
+  // Only shown for the whitelisted meds/forms
+  if (!isPickerEligible()){
+    card.style.display = "none";
+    host.innerHTML = "";
+    return;
+  }
+
+  const products = allCommercialProductsForSelected(); // [{form, mg}]
+  const key = currentKey();
+  const sel = (PRODUCT_SELECTION[key] ||= new Set());
+
+  // If user hasn't touched it yet, default to "all selected"
+  if (sel.size === 0) {
+    products.forEach(p => sel.add(`${p.form}::${p.mg}`));
+  }
+
+  // Group by form
+  const byForm = new Map();
+  products.forEach(p => {
+    if (!byForm.has(p.form)) byForm.set(p.form, []);
+    byForm.get(p.form).push(p.mg);
+  });
+  byForm.forEach(arr => arr.sort((a,b)=>a-b));
+
+  // Build HTML
+  let html = "";
+  for (const [form, mgs] of byForm){
+    html += `<div class="taper-row" style="align-items:flex-start; gap:12px; margin-bottom:6px;">
+      <div style="min-width:160px; font-weight:600;">${form}</div>
+      <div class="grid" style="grid-template-columns: repeat(auto-fill,minmax(110px,1fr)); gap:6px;">`;
+    mgs.forEach(mg=>{
+      const id = `pp_${form.replace(/\W+/g,'_')}_${mg}`;
+      const checked = sel.has(`${form}::${mg}`) ? "checked" : "";
+      html += `<label for="${id}" class="checkbox">
+        <input type="checkbox" id="${id}" data-form="${form}" data-mg="${mg}" ${checked}/>
+        <span>${mg} mg</span>
+      </label>`;
+    });
+    html += `</div></div>`;
+  }
+  host.innerHTML = html;
+
+  // Wire change events
+  host.querySelectorAll('input[type="checkbox"]').forEach(cb=>{
+    cb.addEventListener("change", (e)=>{
+      const f = e.target.dataset.form;
+      const mg = e.target.dataset.mg;
+      const k = `${f}::${mg}`;
+      if (e.target.checked) sel.add(k); else sel.delete(k);
+      // Don’t force any recompute yet; we only use this at generate time
+    });
+  });
+
+  // Buttons
+  const btnAll = document.getElementById("ppSelectAll");
+  const btnClr = document.getElementById("ppClear");
+  if (btnAll) btnAll.onclick = () => {
+    sel.clear(); products.forEach(p => sel.add(`${p.form}::${p.mg}`));
+    host.querySelectorAll('input[type="checkbox"]').forEach(cb=>cb.checked=true);
+  };
+  if (btnClr) btnClr.onclick = () => {
+    sel.clear();
+    host.querySelectorAll('input[type="checkbox"]').forEach(cb=>cb.checked=false);
+  };
+
+  card.style.display = "block";
+}
+
 
 /* ===== Minimal print / save helpers (do NOT duplicate elsewhere) ===== */
 
@@ -1662,14 +1806,24 @@ function updateRecommended(){
 /* =================== Math / composition =================== */
 
 function allowedPiecesMg(cls, med, form){
-  const base = strengthsForSelected().map(parseMgFromStrength).filter(v=>v>0);
-  const uniq=[...new Set(base)].sort((a,b)=>a-b);
+  // If the user picked specific products (form + strength), use only those mg;
+  // otherwise fall back to the existing per-form strengths.
+  const picked = selectedProductMgs();
+  const baseMgs = (picked && picked.length
+    ? picked
+    : strengthsForSelected().map(parseMgFromStrength)
+  ).filter(v => v > 0);
+
+  const uniq = [...new Set(baseMgs)].sort((a,b)=>a-b);
   let pieces = uniq.slice();
-  const split = canSplitTablets(cls,form,med);
-  if(split.half)   uniq.forEach(v=>pieces.push(+(v/2).toFixed(3)));
-  if(split.quarter)uniq.forEach(v=>pieces.push(+(v/4).toFixed(3)));
+
+  const split = canSplitTablets(cls, form, med);
+  if (split.half)    uniq.forEach(v => pieces.push(+(v/2).toFixed(3)));
+  if (split.quarter) uniq.forEach(v => pieces.push(+(v/4).toFixed(3)));
+
   return [...new Set(pieces)].sort((a,b)=>a-b);
 }
+
 function lowestStepMg(cls, med, form){
   if(cls==="Benzodiazepines / Z-Drug (BZRA)" && /Zolpidem/i.test(med) && isMR(form)) return 6.25;
   if(cls==="Benzodiazepines / Z-Drug (BZRA)" && BZRA_MIN_STEP[med]) return BZRA_MIN_STEP[med];
@@ -2389,6 +2543,7 @@ function init(){
   resetDoseLinesToLowest();
   updateRecommended();
   applyPatchIntervalAttributes();
+  renderProductPicker();
   if (typeof setFooterText === "function") setFooterText(document.getElementById("classSelect")?.value || "");
 
   // 4) Change handlers for dependent selects
@@ -2397,6 +2552,7 @@ function init(){
     populateForms();
     updateRecommended();
     applyPatchIntervalAttributes();
+    renderProductPicker();
     if (typeof setFooterText === "function") setFooterText(document.getElementById("classSelect")?.value || "");
     resetDoseLinesToLowest();
     setDirty(true);
@@ -2408,6 +2564,7 @@ function init(){
     populateForms();
     updateRecommended();
     applyPatchIntervalAttributes();
+    renderProductPicker();
     if (typeof setFooterText === "function") setFooterText(document.getElementById("classSelect")?.value || "");
     resetDoseLinesToLowest();
     setDirty(true);
@@ -2421,6 +2578,7 @@ function init(){
     resetDoseLinesToLowest();
     setDirty(true);
     setGenerateEnabled();
+    renderProductPicker();
     if (typeof validatePatchIntervals === "function") validatePatchIntervals(false);
   });
 
@@ -2449,6 +2607,8 @@ document.getElementById("classSelect")?.addEventListener("change", () => {
 
 updateBestPracticeBox();
 updateClassFooter();
+  renderProductPicker();
+
   
   // 7) Live gating + interval hints for patches
   if (typeof ensureIntervalHints === "function") ensureIntervalHints(); // create the hint <div>s once
