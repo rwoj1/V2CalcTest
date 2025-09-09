@@ -133,6 +133,26 @@ button.ghost{background:transparent;border:1px solid var(--border);color:var(--t
 #productPickerCard .checkbox input:checked + span{
   font-weight: 600;
 }
+/* Product picker pills — match dark theme */
+#productPickerCard .product-pill{
+  background: var(--card) !important;          /* or: transparent */
+  border: 1px solid var(--border) !important;
+  color: var(--text) !important;
+}
+
+#productPickerCard .product-pill .sub{
+  color: var(--muted) !important;
+}
+
+#productPickerCard .product-pill:hover{
+  background: rgba(255,255,255,0.04) !important;
+  border-color: #3a4150 !important;
+}
+
+#productPickerCard .product-pill input{
+  accent-color: var(--accent);
+}
+
 
 /* ==============================
    PRINT / PDF rules
