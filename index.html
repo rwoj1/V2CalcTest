@@ -84,6 +84,21 @@
   </p>
 </div>
 
+<!-- Product picker (optional) -->
+<div id="productPickerCard" class="card subtle" style="display:none; margin-top: 12px;">
+  <h3 style="margin-bottom:6px;">Select formulations to use in the taper (optional)</h3>
+  <p class="hint" style="margin-top:0;">
+    Select the commercial products to generate a tapering plan. If none are selected, all products will be used.
+  </p>
+
+  <div id="productPicker" class="taper-block"></div>
+
+  <div class="taper-row" style="gap:8px; margin-top:8px;">
+    <button type="button" class="secondary" id="ppSelectAll">Select all</button>
+    <button type="button" class="secondary" id="ppClear">Clear</button>
+  </div>
+</div>
+  
   <div class="actions">
     <button id="generateBtn" type="button">Generate Chart</button>
     <button id="printBtn" type="button" class="secondary">Print</button>
