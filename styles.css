@@ -87,13 +87,18 @@ button.ghost{background:transparent;border:1px solid var(--border);color:var(--t
 }
 /* --- Product picker layout --- */
 #productPickerCard .product-grid{
-  gap: 6px;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); /* narrower pills */
+  display: flex;                     /* side-by-side bubbles */
+  flex-wrap: wrap;                   /* wrap to next line */
+  gap: 6px;                          /* space between bubbles */
+  align-items: flex-start;
 }
 
 #productPickerCard .checkbox{
-  padding: 6px 8px;                   /* was larger */
-  border-radius: 8px;                 /* slightly tighter */
+  display: inline-flex;              /* shrink to content */
+  align-items: center;
+  width: auto;                       /* don't stretch full width */
+  padding: 6px 8px;
+  border-radius: 8px;
   gap: 8px;
   background: var(--card, transparent);
   border: 1px solid var(--line, #2b3240);
@@ -114,6 +119,7 @@ button.ghost{background:transparent;border:1px solid var(--border);color:var(--t
   font-size: 0.92rem;
   font-weight: 500;
   line-height: 1.15;
+  white-space: nowrap;               /* keep each bubble on one line */
 }
 
 /* Optional small sub-labels if you add them later */
@@ -125,20 +131,18 @@ button.ghost{background:transparent;border:1px solid var(--border);color:var(--t
 
 /* Legacy fallback: if any code still emits .product-pill, style it to match */
 .product-pill{
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
+  gap: 8px;
+  padding: 6px 8px;
   border: 1px solid var(--line, #2b3240);
-  border-radius: 10px;
-  background: var(--card, transparent);   /* removed hard #fff */
+  border-radius: 8px;
+  background: var(--card, transparent);
   color: var(--text, #e5e7eb);
 }
 .product-pill input{ transform: scale(1.05); margin-right: 6px; accent-color: var(--accent, #3b82f6); }
 .product-pill label{ line-height: 1.2; }
 .product-pill .sub{ display: block; font-size: 12px; color: var(--muted, #94a3b8); }
-
-
 
 /* ==============================
    PRINT / PDF rules
