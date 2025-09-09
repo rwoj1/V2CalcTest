@@ -65,54 +65,54 @@ button.ghost{background:transparent;border:1px solid var(--border);color:var(--t
   .inline-label{ white-space:normal; }
   .taper-row{ gap:12px 16px; }
 }
-/* --- Product picker layout (side-by-side bubbles) --- */
-#productPickerCard .product-grid{
-  display: flex;
+/* --- Product picker layout (scoped ONLY to the bubble host) --- */
+#productPicker{
+  display: flex;             /* side-by-side bubbles */
   flex-wrap: wrap;
   gap: 6px;
   align-items: flex-start;
 }
 
-#productPickerCard .checkbox{
-  display: inline-flex;              /* shrink to content */
-  flex-direction: row-reverse;       /* puts checkbox on the RIGHT */
+#productPicker .checkbox{
+  display: inline-flex;      /* shrink to content */
+  flex-direction: row-reverse;  /* text on left, checkbox on right */
   align-items: center;
-  width: auto;                       /* don't stretch */
+  width: auto;
   padding: 6px 8px;
   border-radius: 8px;
-  gap: 8px;                          /* space between text and checkbox */
+  gap: 8px;
   background: var(--card, transparent);
   border: 1px solid var(--line, #2b3240);
 }
 
-#productPickerCard .checkbox:hover{
+#productPicker .checkbox:hover{
   background: var(--card-hover, rgba(255,255,255,0.04));
   border-color: var(--line-strong, #3a4150);
 }
 
-#productPickerCard .checkbox input{
+#productPicker .checkbox input{
   transform: scale(0.95);
-  margin-left: 6px;                  /* space between text and checkbox (right side) */
+  margin-left: 6px;          /* checkbox on the right */
   margin-right: 0;
   accent-color: var(--accent, #3b82f6);
 }
 
-#productPickerCard .checkbox span{
+#productPicker .checkbox span{
   font-size: 0.92rem;
   font-weight: 500;
   line-height: 1.15;
-  white-space: nowrap;               /* keep on one line: "Morphine 5 mg SR Tablet [□]" */
+  white-space: nowrap;       /* keep on one line */
 }
 
-/* Optional small sub-labels if you add them later */
-#productPickerCard .sub{
+/* Optional small sub-labels */
+#productPicker .sub{
   display: block;
   font-size: 12px;
   color: var(--muted, #94a3b8);
 }
 
-/* Legacy fallback: if any code still emits .product-pill, style it to match */
-.product-pill{
+/* Legacy fallback if any items still use .product-pill */
+#productPicker .product-pill{
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -122,10 +122,9 @@ button.ghost{background:transparent;border:1px solid var(--border);color:var(--t
   background: var(--card, transparent);
   color: var(--text, #e5e7eb);
 }
-.product-pill input{ transform: scale(1.05); margin-left: 6px; margin-right: 0; accent-color: var(--accent, #3b82f6); }
-.product-pill label{ line-height: 1.2; }
-.product-pill .sub{ display: block; font-size: 12px; color: var(--muted, #94a3b8); }
-
+#productPicker .product-pill input{ transform: scale(1.05); margin-left: 6px; margin-right: 0; accent-color: var(--accent, #3b82f6); }
+#productPicker .product-pill label{ line-height: 1.2; }
+#productPicker .product-pill .sub{ display: block; font-size: 12px; color: var(--muted, #94a3b8); }
 
 /* ==============================
    PRINT / PDF rules
