@@ -249,10 +249,23 @@ function lowestStepMg(cls, med, form){
 // Snap a %-reduced target to the effective step size.
 // Policy: round UP to avoid under-dose; if unchanged, nudge down by one step for progress.
 function snapTargetToSelection(totalMg, percent, cls, med, form){
-  const step = lowestStepMg(cls, med, form);
+  const step = lowestStepMg(cls, med, form) || 1;
   const raw  = totalMg * (1 - percent/100);
-  let target = Math.ceil(raw / step) * step;         // round ↑ to what’s actually buildable
-  if (target === totalMg && totalMg > 0) target = Math.max(0, totalMg - step); // ensure progress
+
+  const down = Math.floor(raw / step) * step;
+  const up   = Math.ceil(raw / step) * step;
+
+  let target;
+  const dDown = raw - down;
+  const dUp   = up  - raw;
+
+  if (dDown < dUp)       target = down;       // nearer below
+  else if (dUp < dDown)  target = up;         // nearer above
+  else                   target = up;         // exact tie → prefer UP
+
+  // ensure progress if rounding lands unchanged
+  if (target === totalMg && totalMg > 0) target = Math.max(0, totalMg - step);
+
   return { target, step };
 }
 
