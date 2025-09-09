@@ -106,6 +106,18 @@ button.ghost{background:transparent;border:1px solid var(--border);color:var(--t
 .product-pill .sub{
   display:block; font-size:12px; color:#666;
 }
+/* Make the product picker card match other subtle panels */
+#productPickerCard.card-sub{
+  background: var(--panel, #f9fafb);
+  border: 1px solid var(--line, #e5e7eb);
+  border-radius: 10px;
+  padding: 12px;
+}
+
+/* ensure inner checkboxes don't force white backgrounds */
+#productPickerCard .checkbox{
+  background: transparent;
+}
 
 
 /* ==============================
