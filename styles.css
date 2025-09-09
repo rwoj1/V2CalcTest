@@ -13,11 +13,30 @@ h3{font-size:14px;margin:0 0 8px;color:var(--muted)}
 .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:12px 0}
 .grid.compact{grid-template-columns:repeat(2,1fr)}
 .grid > label,
+/* Stack labels inside grid by default */
+.grid > label,
 .grid.compact > label{
   display:flex;
   flex-direction:column;
   gap:6px;
 }
+
+/* EXCEPT: keep Class / Medicine / Form inline (label + select on one line) */
+.grid > label:has(> #classSelect),
+.grid > label:has(> #medicineSelect),
+.grid > label:has(> #formSelect){
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+/* Make the three selects compact so they don't force wrapping */
+#classSelect, #medicineSelect, #formSelect{
+  width: auto;
+  min-width: 160px;
+}
+
 label{
   display:inline-flex;
   align-items:center;
