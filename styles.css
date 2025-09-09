@@ -106,7 +106,33 @@ button.ghost{background:transparent;border:1px solid var(--border);color:var(--t
 .product-pill .sub{
   display:block; font-size:12px; color:#666;
 }
+/* Product picker: make checkbox pills match dark UI */
+#productPickerCard .checkbox{
+  background: transparent !important;         /* kill the white */
+  border: 1px solid var(--line, #2b3240);     /* subtle outline to match cards */
+  border-radius: 10px;
+  padding: 8px 12px;
+}
 
+/* Text color and hover feel */
+#productPickerCard .checkbox span{
+  color: var(--text, #e5e7eb);
+}
+#productPickerCard .checkbox:hover{
+  background: rgba(255,255,255,0.04) !important;
+  border-color: var(--line-strong, #3a4150);
+}
+
+/* Checkbox control itself (keeps your brand accent if defined) */
+#productPickerCard .checkbox input{
+  margin-right: 8px;
+  accent-color: var(--accent, #3b82f6);
+}
+
+/* When checked, make the label pop a touch (optional) */
+#productPickerCard .checkbox input:checked + span{
+  font-weight: 600;
+}
 
 /* ==============================
    PRINT / PDF rules
@@ -327,30 +353,4 @@ button.ghost{background:transparent;border:1px solid var(--border);color:var(--t
 .table thead { display: table-header-group !important; }
 
 }
-/* Product picker: make checkbox pills match dark UI */
-#productPickerCard .checkbox{
-  background: transparent !important;         /* kill the white */
-  border: 1px solid var(--line, #2b3240);     /* subtle outline to match cards */
-  border-radius: 10px;
-  padding: 8px 12px;
-}
 
-/* Text color and hover feel */
-#productPickerCard .checkbox span{
-  color: var(--text, #e5e7eb);
-}
-#productPickerCard .checkbox:hover{
-  background: rgba(255,255,255,0.04) !important;
-  border-color: var(--line-strong, #3a4150);
-}
-
-/* Checkbox control itself (keeps your brand accent if defined) */
-#productPickerCard .checkbox input{
-  margin-right: 8px;
-  accent-color: var(--accent, #3b82f6);
-}
-
-/* When checked, make the label pop a touch (optional) */
-#productPickerCard .checkbox input:checked + span{
-  font-weight: 600;
-}
