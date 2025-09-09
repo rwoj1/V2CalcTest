@@ -196,18 +196,18 @@ function shouldShowProductPicker(cls, med, form){
 function strengthToProductLabel(cls, med, form, strengthStr){
   const mg = parseMgFromStrength(strengthStr);
 
-  // Special pair label for oxycodone/naloxone SR tablet
+  // ✅ Special case: Gabapentin shows simplified labels and uses true form by strength
+  if (/^Gabapentin$/i.test(med)) {
+    const f = gabapentinFormForMg(mg).toLowerCase(); // "tablet" / "capsule"
+    return `${stripZeros(mg)} mg ${f}`;
+  }
+
+  // Oxycodone/naloxone pair label stays as-is
   if (/Oxycodone\s*\/\s*Naloxone/i.test(med)) {
-    return oxyNxPairLabel(mg); // e.g. "Oxycodone 20 mg + naloxone 10 mg SR tablet"
+    return oxyNxPairLabel(mg); // e.g., "Oxycodone 20 mg + naloxone 10 mg SR tablet"
   }
 
-  // Gabapentin shows Capsule vs Tablet by strength
-  if (med === "Gabapentin" && /Tablet\/Capsule/i.test(form)) {
-    const df = (window.GABA_FORM_BY_STRENGTH && GABA_FORM_BY_STRENGTH[mg]) || "Capsule";
-    return `${med} ${stripZeros(mg)} mg ${df}`;
-  }
-
-  // Everyone else: keep your “SR Tablet”/“Tablet”/“Capsule” suffix logic
+  // Everyone else uses your normal suffix logic
   return `${med} ${stripZeros(mg)} mg ${formSuffixWithSR(form)}`;
 }
 
@@ -843,12 +843,14 @@ const isPickerEligible = () => {
 };
 
 // Gabapentin: strength uniquely implies form
+// Map gabapentin strength → form (never guess "Capsule" for 600/800)
 function gabapentinFormForMg(mg){
   mg = +mg;
-  if (mg===600 || mg===800) return "Tablet";
-  if (mg===100 || mg===300 || mg===400) return "Capsule";
-  return "Tablet";
+  if (mg === 600 || mg === 800) return "Tablet";
+  if (mg === 100 || mg === 300 || mg === 400) return "Capsule";
+  return "Capsule";
 }
+
 
 // Build the list of commercial products (form + strength) for the selected medicine
 function allCommercialProductsForSelected(){
@@ -889,78 +891,75 @@ function selectedProductMgs(){
   return Array.from(sel).map(k => parseInt(k.split("::")[1], 10)).filter(Number.isFinite);
 }
 function renderProductPicker(){
+  const clsEl  = document.getElementById("classSelect");
+  const medEl  = document.getElementById("medicineSelect");
+  const formEl = document.getElementById("formSelect");
+  const cls  = (clsEl && clsEl.value)  || "";
+  const med  = (medEl && medEl.value)  || "";
+  const form = (formEl && formEl.value) || "";
+
   const card = document.getElementById("productPickerCard");
   const host = document.getElementById("productPicker");
   if (!card || !host) return;
 
-  // Only shown for the whitelisted meds/forms
-  if (!isPickerEligible()){
+  // Show/hide picker based on allowed medicines/forms
+  if (typeof shouldShowProductPicker === "function" && !shouldShowProductPicker(cls, med, form)) {
     card.style.display = "none";
+    if (window.SelectedFormulations && typeof SelectedFormulations.clear === "function") SelectedFormulations.clear();
     host.innerHTML = "";
     return;
   }
+  card.style.display = "";
 
-  const products = allCommercialProductsForSelected(); // [{form, mg}]
-  const key = currentKey();
-  const sel = (PRODUCT_SELECTION[key] ||= new Set());
+  // Build checkbox list
+  host.innerHTML = "";
+  const strengths = (typeof strengthsForPicker === "function" ? strengthsForPicker() : []);
+  strengths.forEach(s => {
+    const mg = (typeof parseMgFromStrength === "function") ? parseMgFromStrength(s) : parseFloat(String(s).replace(/[^\d.]/g,"")) || 0;
+    if (!Number.isFinite(mg) || mg <= 0) return;
 
-  // If user hasn't touched it yet, default to "all selected"
-  if (sel.size === 0) {
-    products.forEach(p => sel.add(`${p.form}::${p.mg}`));
-  }
+    const id = `prod_${String(med).replace(/\W+/g,'_')}_${mg}`;
+    const wrap = document.createElement("label");
+    wrap.className = "checkbox";
+    wrap.setAttribute("for", id);
 
-  // Group by form
-  const byForm = new Map();
-  products.forEach(p => {
-    if (!byForm.has(p.form)) byForm.set(p.form, []);
-    byForm.get(p.form).push(p.mg);
-  });
-  byForm.forEach(arr => arr.sort((a,b)=>a-b));
+    const cb = document.createElement("input");
+    cb.type = "checkbox";
+    cb.id = id;
 
-  // Build HTML
-  let html = "";
-  for (const [form, mgs] of byForm){
-    html += `<div class="taper-row" style="align-items:flex-start; gap:12px; margin-bottom:6px;">
-      <div style="min-width:160px; font-weight:600;">${form}</div>
-      <div class="grid" style="grid-template-columns: repeat(auto-fill,minmax(110px,1fr)); gap:6px;">`;
-    mgs.forEach(mg=>{
-      const id = `pp_${form.replace(/\W+/g,'_')}_${mg}`;
-      const checked = sel.has(`${form}::${mg}`) ? "checked" : "";
-      html += `<label for="${id}" class="checkbox">
-        <input type="checkbox" id="${id}" data-form="${form}" data-mg="${mg}" ${checked}/>
-        <span>${mg} mg</span>
-      </label>`;
+    // If user has made any selection, reflect it; otherwise show unchecked (using all products by default)
+    const isChecked = (window.SelectedFormulations && SelectedFormulations.size > 0) ? SelectedFormulations.has(mg) : false;
+    cb.checked = isChecked;
+
+    cb.addEventListener("change", () => {
+      if (!window.SelectedFormulations) window.SelectedFormulations = new Set();
+      if (cb.checked) SelectedFormulations.add(mg);
+      else SelectedFormulations.delete(mg);
+      if (typeof setDirty === "function") setDirty(true);
     });
-    html += `</div></div>`;
-  }
-  host.innerHTML = html;
 
-  // Wire change events
-  host.querySelectorAll('input[type="checkbox"]').forEach(cb=>{
-    cb.addEventListener("change", (e)=>{
-      const f = e.target.dataset.form;
-      const mg = e.target.dataset.mg;
-      const k = `${f}::${mg}`;
-      if (e.target.checked) sel.add(k); else sel.delete(k);
-      // Don’t force any recompute yet; we only use this at generate time
-    });
+    const span = document.createElement("span");
+    const title = (typeof strengthToProductLabel === "function")
+      ? strengthToProductLabel(cls, med, form, s)
+      : `${mg} mg`;
+    span.textContent = title; // e.g., "600 mg tablet" / "25 mg capsule"
+
+    wrap.appendChild(cb);
+    wrap.appendChild(span);
+    host.appendChild(wrap);
   });
 
-  // Buttons
-  const btnAll = document.getElementById("ppSelectAll");
-  const btnClr = document.getElementById("ppClear");
-  if (btnAll) btnAll.onclick = () => {
-    sel.clear(); products.forEach(p => sel.add(`${p.form}::${p.mg}`));
-    host.querySelectorAll('input[type="checkbox"]').forEach(cb=>cb.checked=true);
-  };
-  if (btnClr) btnClr.onclick = () => {
-    sel.clear();
-    host.querySelectorAll('input[type="checkbox"]').forEach(cb=>cb.checked=false);
-  };
-
-  card.style.display = "block";
+  // Wire "Clear selection" button
+  const clearBtn = document.getElementById("clearProductSelection");
+  if (clearBtn && !clearBtn._wired) {
+    clearBtn._wired = true;
+    clearBtn.addEventListener("click", () => {
+      if (window.SelectedFormulations && typeof SelectedFormulations.clear === "function") SelectedFormulations.clear();
+      host.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+      if (typeof setDirty === "function") setDirty(true);
+    });
+  }
 }
-
 
 /* ===== Minimal print / save helpers (do NOT duplicate elsewhere) ===== */
 
