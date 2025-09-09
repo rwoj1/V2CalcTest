@@ -2303,66 +2303,117 @@ const doStep = (phasePct) => {
   return rows;
 }
 function renderProductPicker(){
-  const cls  = $("classSelect")?.value || "";
-  const med  = $("medicineSelect")?.value || "";
-  const form = $("formSelect")?.value || "";
-
-  const card = $("productPickerCard");
-  const host = $("productPicker");
+  // elements
+  const card = document.getElementById("productPickerCard");
+  const host = document.getElementById("productPicker");
   if (!card || !host) return;
 
-  // Show/hide based on rules
-  if (!shouldShowProductPicker(cls, med, form)) {
+  // current selection in the controls
+  const clsEl  = document.getElementById("classSelect");
+  const medEl  = document.getElementById("medicineSelect");
+  const formEl = document.getElementById("formSelect");
+  const cls  = (clsEl  && clsEl.value)  || "";
+  const med  = (medEl  && medEl.value)  || "";
+  const form = (formEl && formEl.value) || "";
+
+  // ensure session store exists
+  if (!window.SelectedFormulations) window.SelectedFormulations = new Set();
+
+  // should we show this picker for the current med/form?
+  const canShow = (typeof shouldShowProductPicker === "function")
+    ? shouldShowProductPicker(cls, med, form)
+    : true;
+
+  // figure out strengths we can list
+  const strengths = (typeof strengthsForPicker === "function") ? strengthsForPicker() : [];
+  const hasAny = Array.isArray(strengths) && strengths.length > 0;
+
+  if (!canShow || !hasAny){
     card.style.display = "none";
-    SelectedFormulations.clear();
+    host.innerHTML = "";
     return;
   }
+
   card.style.display = "";
-
-  // Rebuild checkboxes
   host.innerHTML = "";
-  const strengths = strengthsForPicker();
 
+  // build the checkbox list
   strengths.forEach(s => {
-    const mg = parseMgFromStrength(s);
+    const mg = (typeof parseMgFromStrength === "function")
+      ? parseMgFromStrength(s)
+      : (parseFloat(String(s).replace(/[^\d.]/g,"")) || 0);
+    if (!Number.isFinite(mg) || mg <= 0) return;
+
     const id = `prod_${String(med).replace(/\W+/g,'_')}_${mg}`;
 
-    const wrap = document.createElement("div");
-    wrap.className = "product-pill";
+    const label = document.createElement("label");
+    label.className = "checkbox";
+    label.setAttribute("for", id);
 
     const cb = document.createElement("input");
     cb.type = "checkbox";
     cb.id = id;
-    cb.checked = SelectedFormulations.size === 0 ? false : SelectedFormulations.has(mg);
+    cb.dataset.mg = String(mg);
+
+    // if user has any selection, reflect it; otherwise leave unchecked (meaning "use all")
+    cb.checked = (SelectedFormulations.size > 0) ? SelectedFormulations.has(mg) : false;
+
     cb.addEventListener("change", () => {
-      // If user ticks any checkbox, we begin filtering
       if (cb.checked) SelectedFormulations.add(mg);
       else SelectedFormulations.delete(mg);
-      setDirty(true);
+      if (typeof setDirty === "function") setDirty(true);
     });
 
-    const lab = document.createElement("label");
-    lab.setAttribute("for", id);
-    const title = strengthToProductLabel(cls, med, form, s);
-    lab.innerHTML = `<strong>${title}</strong>`;
+    const span = document.createElement("span");
+    const title = (typeof strengthToProductLabel === "function")
+      ? strengthToProductLabel(cls, med, form, s)   // e.g., "600 mg tablet"
+      : `${mg} mg`;
+    span.textContent = title;
 
-    wrap.appendChild(cb);
-    wrap.appendChild(lab);
-    host.appendChild(wrap);
+    label.appendChild(cb);
+    label.appendChild(span);
+    host.appendChild(label);
   });
 
-  // Clear button
-  const clearBtn = $("clearProductSelection");
-  if (clearBtn && !clearBtn._wired) {
-    clearBtn._wired = true;
-    clearBtn.addEventListener("click", () => {
+  // wire buttons (rebind on every render so they're always current)
+  const btnSelectAll = document.getElementById("selectAllProductSelection");
+  const btnClear     = document.getElementById("clearProductSelection");
+
+  if (btnSelectAll){
+    btnSelectAll.onclick = () => {
       SelectedFormulations.clear();
-      // Untick all
-      host.querySelectorAll("input[type=checkbox]").forEach(cb => cb.checked = false);
-      setDirty(true);
-    });
+      // tick everything currently shown
+      host.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+        cb.checked = true;
+        const mg = parseFloat(cb.dataset.mg);
+        if (Number.isFinite(mg) && mg > 0) SelectedFormulations.add(mg);
+      });
+      if (typeof setDirty === "function") setDirty(true);
+    };
+  }
+
+  if (btnClear){
+    btnClear.onclick = () => {
+      SelectedFormulations.clear();
+      host.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+      if (typeof setDirty === "function") setDirty(true);
+    };
   }
 }
+// Auto-clear the selection whenever medicine or form changes, then re-render
+(function wireProductPickerResets(){
+  const med  = document.getElementById("medicineSelect");
+  const form = document.getElementById("formSelect");
+  const reset = () => {
+    if (!window.SelectedFormulations) window.SelectedFormulations = new Set();
+    SelectedFormulations.clear();
+    renderProductPicker();
+    if (typeof setDirty === "function") setDirty(true);
+  };
+  if (med  && !med._ppReset)  { med._ppReset  = true; med.addEventListener("change", reset); }
+  if (form && !form._ppReset) { form._ppReset = true; form.addEventListener("change", reset); }
+})();
+
 
 /* =================== Patches builder — date-based Phase-2; start at step 2 =================== */
 
