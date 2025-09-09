@@ -12,7 +12,17 @@ h3{font-size:14px;margin:0 0 8px;color:var(--muted)}
 
 .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:12px 0}
 .grid.compact{grid-template-columns:repeat(2,1fr)}
-label{display:flex;flex-direction:column;gap:6px}
+.grid > label,
+.grid.compact > label{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+label{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+}
 select,input{background:#0b1220;color:var(--text);border:1px solid var(--border);border-radius:10px;padding:10px}
 
 .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;margin:14px 0}
@@ -43,12 +53,12 @@ button.ghost{background:transparent;border:1px solid var(--border);color:var(--t
   .grid.compact{grid-template-columns:1fr}
   .actions{flex-direction:column;align-items:flex-start}
 }
-/* Taper controls: one-line "Label: [input]" pairs */
+/* Taper controls: one-line "Label: [input]" pairs that wrap nicely on small screens */
 .taper-row{
   display:flex;
-  flex-wrap:wrap;
-  gap:16px 24px;          /* row gap / column gap */
   align-items:center;
+  flex-wrap:wrap;          /* allows wrap on small screens */
+  gap:12px 20px;           /* row gap / column gap */
   margin-bottom:8px;
 }
 .inline-label{
@@ -99,14 +109,6 @@ button.ghost{background:transparent;border:1px solid var(--border);color:var(--t
   line-height:1.15;
   white-space:nowrap;
 }
-/* Taper controls: keep "Reduce by (%)  [input]  Every (days)  [input]" inline */
-.taper-row{
-  display:flex;
-  align-items:center;
-  flex-wrap:wrap;   /* still wraps on tiny screens */
-  gap:8px;
-}
-
 /* Make labels & spans stay on one line next to their inputs */
 .taper-row label,
 .taper-row span{
