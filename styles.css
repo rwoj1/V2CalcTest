@@ -12,8 +12,8 @@ h3{font-size:14px;margin:0 0 8px;color:var(--muted)}
 
 .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:12px 0}
 .grid.compact{grid-template-columns:repeat(2,1fr)}
-.grid > label,
-/* Stack labels inside grid by default */
+
+/* Stack labels inside grids by default */
 .grid > label,
 .grid.compact > label{
   display:flex;
@@ -160,39 +160,6 @@ button.ghost{background:transparent;border:1px solid var(--border);color:var(--t
   width:auto;
   min-width:84px;   /* tweak if you want tighter */
 }
-/* Stack labels only inside grid forms by default */
-.grid > label,
-.grid.compact > label{
-  display:flex;
-  flex-direction:column;
-  gap:6px;
-}
-
-/* EXCEPTIONS: keep Class / Medicine / Form inline (label + select on one line) */
-.grid > label[for="classSelect"],
-.grid > label[for="medicineSelect"],
-.grid > label[for="formSelect"]{
-  display:inline-flex;
-  flex-direction:row;
-  align-items:center;
-  gap:6px;
-  white-space:nowrap;
-}
-
-/* Make the three selects compact so they don't force wrapping */
-#classSelect, #medicineSelect, #formSelect{
-  width:auto;
-  min-width: 160px;   /* tweak if you need tighter */
-}
-
-/* Keep their row inline and nicely spaced */
-label[for="classSelect"],
-label[for="medicineSelect"],
-label[for="formSelect"]{
-  white-space:nowrap;
-}
-
-
 
 /* ==============================
    PRINT / PDF rules
