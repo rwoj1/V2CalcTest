@@ -2899,9 +2899,9 @@ function setupDisclaimerGate(){
   card.innerHTML = `
     <div class="card-head"><h2>Important Notice</h2></div>
     <div class="disclaimer-copy">
-      <p>This calculator is designed as an information tool only, and all information contained therein is solely for use by trained medical professionals who are experienced calculation of a doses of opioids based on currently published conversion factors and are competent to understand the risk, benefits and alternatives to various medicine tapering plans and determine which medicine and dosage, if any, will be safe and effective for any particular patient. Clinical application of any data obtained by use of the calculator is the sole responsibility of the user only.</p>
+      <p>This calculator is designed as an information tool only, and all information contained is solely for the use by a trained medical professional who is experienced in tapering medicines based on currently published evidence and are competent to understand the risk, benefits and alternatives to various medicine tapering plans and determine which medicine and dosage, if any, will be safe and effective for any particular patient. Clinical application of any data obtained by use of the calculator is the sole responsibility of the user only.</p>
       <label class="inline-label" for="acceptTaperDisclaimer">
-        <strong>Tick yes if you accept</strong>
+        <strong>Check the box if you accept</strong>
         <input id="acceptTaperDisclaimer" type="checkbox" />
       </label>
     </div>
