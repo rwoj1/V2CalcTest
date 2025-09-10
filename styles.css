@@ -1,33 +1,41 @@
 
 /* =========================================================
-   THEME (Light)
+   THEME (Light, Blue Palette)
+   Palette: 094D76, 118BD5, 0E75B3, 0D6CA6 + white
    ========================================================= */
 :root{
+  /* Brand blues */
+  --brand-900: #094D76;
+  --brand-700: #0D6CA6;
+  --brand-600: #0E75B3;
+  --brand-500: #118BD5;
+
+  /* UI tokens */
   --bg: #ffffff;
   --card: #ffffff;
-  --text: #111827;          /* near-black */
-  --muted: #4b5563;         /* gray-600 */
-  --accent: #2563eb;        /* blue-600 */
-  --border: #e5e7eb;        /* gray-200 */
-  --line: #e5e7eb;
-  --line-strong: #d1d5db;   /* gray-300 */
-  --card-hover: #f3f4f6;    /* gray-100 */
+  --text: #111827;            /* near-black */
+  --muted: #4b5563;           /* gray-600 */
+  --border: #e5e7eb;          /* gray-200 */
+  --line: #e5e7eb;            /* light separators */
+  --line-strong: #cbd5e1;     /* gray-300 */
+  --card-hover: #f3f4f6;      /* gray-100 */
+  --accent: var(--brand-500);
 }
 
-*{ box-sizing: border-box; }
+*{ box-sizing:border-box; }
 html,body{
   margin:0; padding:0;
-  background: var(--bg);
-  color: var(--text);
-  font: 14px/1.45 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
 }
 
 /* =========================================================
    LAYOUT & HEADINGS
    ========================================================= */
 .container{ max-width:1000px; margin:24px auto; padding:0 16px; }
-h1{ font-size:22px; margin:0 0 12px; }
-h2{ font-size:18px; margin:0 0 10px; }
+h1{ font-size:22px; margin:0 0 12px; color:var(--brand-900); }
+h2{ font-size:18px; margin:0 0 10px; color:var(--brand-700); }
 h3{ font-size:14px; margin:0 0 8px; color:var(--muted); }
 
 /* Grid containers */
@@ -43,89 +51,79 @@ h3{ font-size:14px; margin:0 0 8px; color:var(--muted); }
 }
 
 /* =========================================================
-   MEDICINE CHART INPUT (Class | Medicine | Form)
+   MEDICINE CHART INPUT (Class | Medicine | Form + Dates)
    ========================================================= */
-/* Target only the grid that contains the Class/Medicine/Form labels */
-.grid:has(> label[for="classSelect"]) {
+.grid:has(> label[for="classSelect"]){
   display:grid;
   grid-template-columns: repeat(3, minmax(220px, 1fr)); /* Class | Medicine | Form */
-  gap: 12px 20px;                                       /* row / column gaps */
+  gap: 12px 20px;
 }
-/* Labels stack (text above control) like your screenshot */
 .grid:has(> label[for="classSelect"]) > label{
-  display:flex;
-  flex-direction:column;
-  gap:6px;
+  display:flex; flex-direction:column; gap:6px;
 }
-/* Controls fill their column neatly (includes dates on row 2) */
 #classSelect, #medicineSelect, #formSelect, #startDate, #reviewDate{ width:100%; }
 
-/* Responsive: collapse to 2 cols, then 1 */
-@media (max-width: 900px){
-  .grid:has(> label[for="classSelect"]){
-    grid-template-columns: repeat(2, minmax(220px, 1fr));
-  }
+@media (max-width:900px){
+  .grid:has(> label[for="classSelect"]){ grid-template-columns: repeat(2, minmax(220px, 1fr)); }
 }
-@media (max-width: 600px){
-  .grid:has(> label[for="classSelect"]){
-    grid-template-columns: 1fr;
-  }
+@media (max-width:600px){
+  .grid:has(> label[for="classSelect"]){ grid-template-columns: 1fr; }
 }
 
 /* =========================================================
    CONTROLS / CARDS / BUTTONS / BADGES
    ========================================================= */
 select, input, textarea{
-  background:#fff;
-  color:var(--text);
+  background:#fff; color:var(--text);
   border:1px solid var(--border);
-  border-radius:10px;
-  padding:10px;
+  border-radius:10px; padding:10px;
+}
+select:focus, input:focus, textarea:focus{
+  outline:2px solid color-mix(in srgb, var(--brand-500) 35%, transparent);
+  border-color: var(--brand-500);
 }
 
 .card{
   background:var(--card);
   border:1px solid var(--border);
   border-radius:14px;
-  padding:14px;
-  margin:14px 0;
+  padding:14px; margin:14px 0;
 }
 .card-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
 
 .pill{
-  background:#f9fafb;                 /* gray-50 */
-  border:1px solid var(--border);
-  border-radius:999px;
-  padding:6px 10px;
-  color:var(--muted);
+  background:#f9fafb; border:1px solid var(--border);
+  border-radius:999px; padding:6px 10px; color:var(--muted);
 }
 
+/* Buttons */
 button{
-  background:var(--accent);
-  border:none;
-  color:#ffffff;
-  padding:10px 14px;
-  border-radius:10px;
-  cursor:pointer;
-  font-weight:600;
+  background:var(--accent); color:#ffffff;
+  border:none; border-radius:10px;
+  padding:10px 14px; cursor:pointer; font-weight:600;
 }
+button:hover{ background:var(--brand-600); }
+button:active{ background:var(--brand-700); }
+button:focus-visible{ outline:2px solid color-mix(in srgb, var(--brand-900) 35%, transparent); outline-offset:2px; }
+
 button.secondary{
-  background:#e5e7eb;                 /* gray-200 */
-  color:#111827;
-  border:1px solid #d1d5db;           /* gray-300 */
+  background: color-mix(in srgb, var(--brand-500) 12%, #ffffff 88%);
+  color: var(--brand-900);
+  border:1px solid var(--brand-600);
 }
+button.secondary:hover{
+  background: color-mix(in srgb, var(--brand-500) 18%, #ffffff 82%);
+}
+
 button.ghost{
-  background:transparent;
-  color:#111827;
-  border:1px solid #d1d5db;
+  background:transparent; color:var(--brand-700);
+  border:1px solid var(--brand-600);
 }
 .actions{ display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
 
 .dose-lines .badge{
-  background:#eef2f7;                 /* light gray */
-  padding:4px 8px;
-  border-radius:999px;
-  color:#374151;
+  background:#eef2f7; color:#374151;
+  padding:4px 8px; border-radius:999px;
 }
 
 .hint{ color:var(--muted); margin:6px 0 0; }
@@ -134,12 +132,11 @@ button.ghost{
    TABLES
    ========================================================= */
 .table{ width:100%; border-collapse:separate; border-spacing:0 8px; }
-.table thead th{ font-weight:600; text-align:left; padding:8px; color:#111827; }
+.table thead th{ font-weight:600; text-align:left; padding:8px; color:var(--brand-900); }
 .table tbody td{
-  background:#fff;
+  background:#fff; color:var(--text);
   border:1px solid var(--border);
-  padding:10px;
-  vertical-align:top;
+  padding:10px; vertical-align:top;
 }
 .table tbody tr td:first-child{ border-top-left-radius:10px; border-bottom-left-radius:10px; }
 .table tbody tr td:last-child { border-top-right-radius:10px; border-bottom-right-radius:10px; }
@@ -154,84 +151,58 @@ button.ghost{
    TAPER CONTROLS (inline label + input pairs)
    ========================================================= */
 .taper-row{
-  display:flex;
-  align-items:center;
-  flex-wrap:wrap;           /* allows wrap on very small screens */
-  gap:12px 20px;            /* row gap / column gap */
-  margin-bottom:8px;
+  display:flex; align-items:center; flex-wrap:wrap;
+  gap:12px 20px; margin-bottom:8px;
 }
 .inline-label{
-  display:inline-flex;      /* "Text: [input]" on one line */
-  align-items:center;
-  gap:8px;
-  white-space:nowrap;       /* keep label on one line on wide screens */
+  display:inline-flex; align-items:center; gap:8px;
+  white-space:nowrap;
 }
 .inline-label input[type="number"]{ width:110px; }
 .inline-label .datepick{ width:170px; }
 
-/* Small screens: allow wrapping */
 @media (max-width:700px){
   .inline-label{ white-space:normal; }
   .taper-row{ gap:12px 16px; }
 }
 
-/* Keep label text/spans inline with their inputs inside taper rows */
-.taper-row label,
-.taper-row span{
-  white-space:nowrap;
-  display:inline-flex;
-  align-items:center;
-  gap:6px;
+.taper-row label, .taper-row span{
+  white-space:nowrap; display:inline-flex; align-items:center; gap:6px;
 }
-/* Inputs compact so they don't force wrapping */
 .taper-row input[type="number"],
 .taper-row input[type="text"],
 .taper-row select{
-  display:inline-block;
-  width:auto;
-  min-width:84px;
+  display:inline-block; width:auto; min-width:84px;
 }
 
 /* =========================================================
-   PRODUCT PICKER (bubbles in shades of grey)
+   PRODUCT PICKER (bubbles; grey base, brand on checked/hover)
    ========================================================= */
 #productPicker{
-  display:flex;
-  flex-wrap:wrap;
-  gap:6px;
-  align-items:flex-start;
+  display:flex; flex-wrap:wrap; gap:6px; align-items:flex-start;
 }
 #productPicker .checkbox{
-  display:inline-flex;
-  flex-direction:row-reverse;   /* text left, checkbox right */
-  align-items:center;
-  width:auto;
-  padding:6px 8px;
-  border-radius:8px;
-  gap:8px;
-  background:#f9fafb;           /* gray-50 */
-  border:1px solid var(--line); /* gray-200 */
+  display:inline-flex; flex-direction:row-reverse; align-items:center;
+  width:auto; padding:6px 8px; border-radius:8px; gap:8px;
+  background:#f9fafb;                     /* gray-50 */
+  border:1px solid var(--line);           /* gray-200 */
   color:var(--text);
 }
 #productPicker .checkbox:hover{
-  background:#f3f4f6;           /* gray-100 */
-  border-color:var(--line-strong);
+  background:#f3f4f6;                     /* gray-100 */
+  border-color: var(--brand-600);         /* brand hover border */
 }
 #productPicker .checkbox:has(input:checked){
-  background:#e5e7eb;           /* gray-200 */
-  border-color:#cbd5e1;         /* gray-300/400 */
+  background: color-mix(in srgb, var(--brand-500) 12%, #ffffff 88%); /* subtle brand tint */
+  border-color: var(--brand-600);
 }
 #productPicker .checkbox input{
   transform:scale(0.95);
-  margin-left:6px;              /* checkbox on the right */
-  margin-right:0;
-  accent-color:var(--accent);
+  margin-left:6px; margin-right:0;
+  accent-color: var(--brand-500);
 }
 #productPicker .checkbox span{
-  font-size:0.92rem;
-  font-weight:500;
-  line-height:1.15;
-  white-space:nowrap;
+  font-size:0.92rem; font-weight:500; line-height:1.15; white-space:nowrap;
 }
 
 /* =========================================================
