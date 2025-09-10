@@ -10,7 +10,7 @@
 </head>
 <body>
   <main class="container">
-    <h1>Medicine Chart Input</h1>
+    <h1>Medicine Tapering Calculator</h1>
 
     <div class="grid">
       <label>Medicine Class
@@ -25,7 +25,7 @@
     </div>
 
     <div class="grid">
-      <label>Start date
+      <label>Start date for tapering
         <input id="startDate" class="datepick" placeholder="Select date" />
       </label>
       <label>Next review date (optional)
@@ -35,11 +35,10 @@
 
     <section class="card">
       <div class="card-head">
-        <h2>Dose lines</h2>
+        <h2>Current Dosage</h2>
         <button id="addDoseLineBtn" type="button" class="secondary">Add Dose Line</button>
       </div>
       <div id="doseLinesContainer" class="dose-lines"></div>
-<p class="hint">Only <strong>Strength</strong>, <strong>Number of doses</strong> and <strong>Frequency</strong> can be changed.</p>
     </section>
 
     <section class="card">
