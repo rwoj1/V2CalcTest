@@ -1,6 +1,6 @@
 
 /* =========================================================
-   THEME — Blue Palette with Spacious White Cards
+   THEME — Flip backgrounds (White page • Light-blue cards)
    Palette: 094D76, 118BD5, 0E75B3, 0D6CA6
    ========================================================= */
 :root{
@@ -11,114 +11,121 @@
   --brand-500: #118BD5;
 
   /* Surfaces & text */
-  --page-top:   #0D6CA6;   /* gradient top */
-  --page-bot:   #094D76;   /* gradient bottom */
-  --card:       #ffffff;   /* spacious white cards */
-  --card-hover: #f6fbff;   /* very light blue hover */
-  --text:       #111827;   /* near-black in cards */
-  --text-inv:   #f5f9fc;   /* on blue background */
-  --muted:      #4b5563;   /* gray-600 inside cards */
-  --border:     #e5e7eb;   /* gray-200 */
-  --line:       #e5e7eb;
-  --line-strong:#cbd5e1;
+  --page:        #ffffff;                         /* outer background */
+  --card:        #EDF6FB;                         /* inner cards (light blue) */
+  --card-hover:  #E6F2F9;                         /* slightly darker on hover */
+  --text:        #0f172a;                         /* near-black in cards */
+  --muted:       #4b5563;                         /* gray-600 */
+  --border:      #dbe9f5;                         /* light blue-gray */
+  --line:        #e5eef6;                         /* separators */
+  --line-strong: #c9dfef;
 
-  /* Accents */
-  --accent:     var(--brand-500);
-  --accent-2:   var(--brand-600);
+  /* Accent */
+  --accent:      var(--brand-500);
 }
 
-/* Page background (subtle blue gradient), cards provide whitespace */
+*{ box-sizing:border-box; }
 html, body{
-  background: linear-gradient(180deg, var(--page-top), var(--page-bot));
-  color: var(--text-inv);
+  margin:0; padding:0;
+  background: var(--page);        /* white outer background */
+  color: var(--text);
+  font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
 }
 
-/* Container spacing for airy feel */
-.container{ max-width: 1040px; margin: 28px auto; padding: 0 18px; }
+/* =========================================================
+   LAYOUT & HEADINGS
+   ========================================================= */
+.container{ max-width:1040px; margin:28px auto; padding:0 18px; }
+h1{ font-size:22px; margin:0 0 12px; color:var(--brand-900); }
+h2{ font-size:18px; margin:0 0 10px; color:var(--brand-700); }
+h3{ font-size:14px; margin:0 0 8px; color:var(--muted); }
 
-/* ---------------------------------------------------------
-   Cards / Panels
-   --------------------------------------------------------- */
+/* Cards */
 .card{
   background: var(--card);
-  color: var(--text);
   border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 18px;
-  margin: 18px 0;
+  border-radius:16px;
+  padding:18px;
+  margin:18px 0;
   box-shadow:
-    0 10px 24px rgba(9,109,166,0.08),
-    0 2px 6px rgba(0,0,0,0.04);
+    0 10px 22px rgba(17,139,213,0.06),
+    0 2px 6px rgba(0,0,0,0.03);
 }
 .card:hover{ background: var(--card-hover); }
 
-.card-head{
-  display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;
-}
-
-/* A slim brand underline under card titles */
-.card-head h2, .card-head h3{
-  position: relative; padding-bottom: 4px; margin-bottom: 2px;
-}
+.card-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+.card-head h2, .card-head h3{ position:relative; padding-bottom:4px; margin-bottom:2px; }
 .card-head h2::after, .card-head h3::after{
-  content:""; position:absolute; left:0; right:0; bottom:-2px; height:3px;
+  content:""; position:absolute; left:0; bottom:-2px; height:3px; width:56px;
   background: linear-gradient(90deg, var(--brand-500), var(--brand-700));
-  border-radius: 2px; opacity: 0.18;
+  border-radius:2px; opacity:.25;
 }
 
-/* Headings (inside cards use dark text) */
-h1{ font-size:22px; color:#ffffff; margin:0 0 12px; }          /* page title (on blue bg) */
-h2{ font-size:18px; color: var(--brand-900); margin:0 0 10px; }
-h3{ font-size:14px; color: var(--muted); margin:0 0 8px; }
+/* =========================================================
+   MEDICINE CHART INPUT (Class | Medicine | Form + Dates)
+   ========================================================= */
+.grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin:12px 0; }
+.grid.compact{ grid-template-columns:repeat(2,1fr); }
 
-/* ---------------------------------------------------------
-   Controls
-   --------------------------------------------------------- */
+/* Stack labels inside grids by default */
+.grid > label, .grid.compact > label{
+  display:flex; flex-direction:column; gap:6px;
+}
+
+/* Specific layout for the Medicine block (as before) */
+.grid:has(> label[for="classSelect"]){
+  grid-template-columns: repeat(3, minmax(220px, 1fr)); /* Class | Medicine | Form */
+  gap: 12px 20px;
+}
+.grid:has(> label[for="classSelect"]) > label{
+  display:flex; flex-direction:column; gap:6px;       /* label stacked above control */
+}
+#classSelect, #medicineSelect, #formSelect, #startDate, #reviewDate{ width:100%; }
+
+/* Responsive collapse for that block */
+@media (max-width:900px){
+  .grid:has(> label[for="classSelect"]){
+    grid-template-columns: repeat(2, minmax(220px, 1fr));
+  }
+}
+@media (max-width:600px){
+  .grid:has(> label[for="classSelect"]){
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =========================================================
+   CONTROLS / BUTTONS / BADGES
+   ========================================================= */
 select, input, textarea{
-  background:#fff;
+  background:#ffffff;
   color:var(--text);
-  border:1px solid var(--border);
+  border:1px solid var(--line);
   border-radius:10px;
   padding:10px;
-  outline: none;
-  transition: border-color .15s ease, box-shadow .15s ease;
+  outline:none;
+  transition:border-color .15s ease, box-shadow .15s ease;
 }
 select:focus, input:focus, textarea:focus{
   border-color: var(--brand-600);
   box-shadow: 0 0 0 3px rgba(17,139,213,0.18);
 }
 
-/* Inline control rows (keeps your existing layout) */
-.taper-row{
-  display:flex; align-items:center; flex-wrap:wrap;
-  gap:12px 20px; margin-bottom:10px;
-}
-.inline-label{ display:inline-flex; align-items:center; gap:8px; white-space:nowrap; }
-
-/* ---------------------------------------------------------
-   Buttons
-   --------------------------------------------------------- */
 button{
   background: linear-gradient(180deg, var(--brand-500), var(--brand-600));
-  color: #ffffff;
-  border: none;
-  border-radius: 10px;
-  padding: 10px 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: transform .05s ease, filter .15s ease;
+  color:#ffffff;
+  border:none; border-radius:10px;
+  padding:10px 14px; font-weight:600; cursor:pointer;
+  transition:transform .05s ease, filter .15s ease;
 }
-button:hover{ filter: brightness(1.05); }
-button:active{ transform: translateY(1px); }
-button:focus-visible{ outline: 2px solid rgba(9,77,118,0.35); outline-offset: 2px; }
+button:hover{ filter:brightness(1.05); }
+button:active{ transform:translateY(1px); }
+button:focus-visible{ outline:2px solid rgba(9,77,118,.35); outline-offset:2px; }
 
 button.secondary{
-  background: color-mix(in srgb, var(--brand-500) 10%, #ffffff 90%);
+  background: color-mix(in srgb, var(--brand-500) 12%, #ffffff 88%);
   color: var(--brand-900);
   border: 1px solid var(--brand-600);
-}
-button.secondary:hover{
-  background: color-mix(in srgb, var(--brand-500) 16%, #ffffff 84%);
 }
 button.ghost{
   background: transparent;
@@ -126,41 +133,48 @@ button.ghost{
   border: 1px solid var(--brand-600);
 }
 
-/* ---------------------------------------------------------
-   Pills / Badges (Dose Lines, “Medicine:”, Suggested Practice)
-   --------------------------------------------------------- */
 .pill, .dose-lines .badge{
-  background: color-mix(in srgb, var(--brand-500) 10%, #ffffff 90%);
+  background: color-mix(in srgb, var(--brand-500) 12%, #ffffff 88%);
   border: 1px solid color-mix(in srgb, var(--brand-600) 35%, #e5e7eb 65%);
   color: var(--brand-900);
-  border-radius: 999px;
-  padding: 6px 10px;
+  border-radius:999px;
+  padding:6px 10px;
 }
 
-/* ---------------------------------------------------------
-   Product Picker (bubbles)
-   --------------------------------------------------------- */
-#productPicker{
-  display:flex; flex-wrap:wrap; gap:6px; align-items:flex-start;
+.hint{ color:var(--muted); margin:6px 0 0; }
+.actions{ display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+
+/* =========================================================
+   TAPER CONTROLS (inline pairs remain inline)
+   ========================================================= */
+.taper-row{
+  display:flex; align-items:center; flex-wrap:wrap;
+  gap:12px 20px; margin-bottom:10px;
 }
+.inline-label{ display:inline-flex; align-items:center; gap:8px; white-space:nowrap; }
+
+/* =========================================================
+   PRODUCT PICKER (bubbles within blue cards)
+   ========================================================= */
+#productPicker{ display:flex; flex-wrap:wrap; gap:6px; align-items:flex-start; }
 #productPicker .checkbox{
   display:inline-flex; flex-direction:row-reverse; align-items:center;
   width:auto; padding:6px 8px; border-radius:8px; gap:8px;
-  background: #f2f7fb;                     /* pale blue bubble */
-  border: 1px solid #d8e9f6;
-  color: var(--text);
+  background:#ffffff;                      /* white chips on blue cards */
+  border:1px solid var(--line);
+  color:var(--text);
   transition: background .15s ease, border-color .15s ease;
 }
 #productPicker .checkbox:hover{
-  background: #e9f2f9;
-  border-color: #cfe6f7;
+  background:#f7fbff;
+  border-color: var(--brand-600);
 }
 #productPicker .checkbox:has(input:checked){
-  background: color-mix(in srgb, var(--brand-500) 14%, #ffffff 86%);
+  background: color-mix(in srgb, var(--brand-500) 10%, #ffffff 90%);
   border-color: var(--brand-600);
 }
 #productPicker .checkbox input{
-  transform: scale(0.95);
+  transform:scale(0.95);
   margin-left:6px; margin-right:0;
   accent-color: var(--brand-500);
 }
@@ -168,16 +182,13 @@ button.ghost{
   font-size:0.92rem; font-weight:500; line-height:1.15; white-space:nowrap;
 }
 
-/* ---------------------------------------------------------
-   Tables (inside cards)
-   --------------------------------------------------------- */
+/* =========================================================
+   TABLES
+   ========================================================= */
 .table{ width:100%; border-collapse:separate; border-spacing:0 8px; }
-.table thead th{
-  font-weight:600; text-align:left; padding:8px;
-  color: var(--brand-900);
-}
+.table thead th{ font-weight:600; text-align:left; padding:8px; color:var(--brand-900); }
 .table tbody td{
-  background:#fff; color:var(--text);
+  background:#ffffff; color:var(--text);
   border:1px solid var(--border);
   padding:10px; vertical-align:top;
 }
@@ -186,21 +197,16 @@ button.ghost{
 
 .output-head{ display:flex; gap:10px; align-items:center; justify-content:space-between; margin-bottom:8px; }
 .footer-notes{ margin-top:12px; padding-top:8px; border-top:1px solid var(--border); }
-.class-footer{ white-space:pre-wrap; line-height:1.35; font-size:0.95rem; color: var(--text); }
+.class-footer{ white-space:pre-wrap; line-height:1.35; font-size:0.95rem; color:var(--text); }
 
-/* ---------------------------------------------------------
-   Headings on the blue background (outside cards)
-   --------------------------------------------------------- */
-header h1, .page-title, .hero h1{ color:#ffffff; }
-
-/* ---------------------------------------------------------
-   Responsive
-   --------------------------------------------------------- */
+/* =========================================================
+   RESPONSIVE (global grid fallback)
+   ========================================================= */
 @media (max-width:800px){
-  .container{ margin: 22px auto; }
-  .card{ padding:16px; margin:16px 0; }
+  .grid{ grid-template-columns:1fr; }
+  .grid.compact{ grid-template-columns:1fr; }
+  .actions{ flex-direction:column; align-items:flex-start; }
 }
-
 
 /* ==============================
    PRINT / PDF rules
