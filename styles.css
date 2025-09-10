@@ -214,6 +214,58 @@ button.ghost{
   .actions{ flex-direction:column; align-items:flex-start; }
 }
 
+/* =========================================================
+   Light-blue bubbles for: Dose Lines / Suggested practice /
+   Taper controls / Medicine
+   ========================================================= */
+:root{
+  /* Light blue bubble tokens */
+  --bubble-blue-bg:    #EAF4FB;  /* very light */
+  --bubble-blue-hover: #E1EFFA;  /* slightly darker on hover */
+  --bubble-blue-bdr:   #CFE6F7;  /* border */
+  --bubble-blue-text:  #0D6CA6;  /* from your palette */
+}
+
+/* Generic bubble style you already use */
+.pill{
+  background: var(--bubble-blue-bg);
+  border: 1px solid var(--bubble-blue-bdr);
+  color: var(--bubble-blue-text);
+}
+
+/* Dose Lines badge */
+.dose-lines .badge{
+  background: var(--bubble-blue-bg);
+  border: 1px solid var(--bubble-blue-bdr);
+  color: var(--bubble-blue-text);
+}
+
+/* Bubbles that appear in card headers (e.g., Taper controls, Medicine:) */
+.card-head .pill{
+  background: var(--bubble-blue-bg);
+  border: 1px solid var(--bubble-blue-bdr);
+  color: var(--bubble-blue-text);
+}
+
+/* Suggested practice bubble/tag (covers either .pill or .badge inside the box) */
+#bestPracticeBox .pill,
+#bestPracticeBox .badge{
+  background: var(--bubble-blue-bg);
+  border: 1px solid var(--bubble-blue-bdr);
+  color: var(--bubble-blue-text);
+}
+
+/* Optional: pleasant hover for any of the above bubbles */
+.pill:hover,
+.dose-lines .badge:hover,
+.card-head .pill:hover,
+#bestPracticeBox .pill:hover,
+#bestPracticeBox .badge:hover{
+  background: var(--bubble-blue-hover);
+  border-color: var(--bubble-blue-bdr);
+}
+
+
 /* ==============================
    PRINT / PDF rules
    ============================== */
