@@ -1,17 +1,38 @@
 
+/* =========================================================
+   THEME (Light)
+   ========================================================= */
 :root{
-  --bg:#0f172a; --card:#111827; --muted:#9ca3af; --text:#e5e7eb; --accent:#60a5fa; --border:#1f2937;
+  --bg: #ffffff;
+  --card: #ffffff;
+  --text: #111827;          /* near-black */
+  --muted: #4b5563;         /* gray-600 */
+  --accent: #2563eb;        /* blue-600 */
+  --border: #e5e7eb;        /* gray-200 */
+  --line: #e5e7eb;
+  --line-strong: #d1d5db;   /* gray-300 */
+  --card-hover: #f3f4f6;    /* gray-100 */
 }
-*{box-sizing:border-box}
-html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
 
-.container{max-width:1000px;margin:24px auto;padding:0 16px}
-h1{font-size:22px;margin:0 0 12px}
-h2{font-size:18px;margin:0 0 10px}
-h3{font-size:14px;margin:0 0 8px;color:var(--muted)}
+*{ box-sizing: border-box; }
+html,body{
+  margin:0; padding:0;
+  background: var(--bg);
+  color: var(--text);
+  font: 14px/1.45 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+}
 
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:12px 0}
-.grid.compact{grid-template-columns:repeat(2,1fr)}
+/* =========================================================
+   LAYOUT & HEADINGS
+   ========================================================= */
+.container{ max-width:1000px; margin:24px auto; padding:0 16px; }
+h1{ font-size:22px; margin:0 0 12px; }
+h2{ font-size:18px; margin:0 0 10px; }
+h3{ font-size:14px; margin:0 0 8px; color:var(--muted); }
+
+/* Grid containers */
+.grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin:12px 0; }
+.grid.compact{ grid-template-columns:repeat(2,1fr); }
 
 /* Stack labels inside grids by default */
 .grid > label,
@@ -21,95 +42,159 @@ h3{font-size:14px;margin:0 0 8px;color:var(--muted)}
   gap:6px;
 }
 
-/* --- Medicine Chart Input layout (only this grid) --- */
+/* =========================================================
+   MEDICINE CHART INPUT (Class | Medicine | Form)
+   ========================================================= */
 /* Target only the grid that contains the Class/Medicine/Form labels */
 .grid:has(> label[for="classSelect"]) {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(220px, 1fr)); /* 3 cols: Class | Medicine | Form */
-  gap: 12px 20px;                                      /* row / column gaps */
+  display:grid;
+  grid-template-columns: repeat(3, minmax(220px, 1fr)); /* Class | Medicine | Form */
+  gap: 12px 20px;                                       /* row / column gaps */
 }
-
-/* Inside this grid, stack label text above its control (like your screenshot) */
-.grid:has(> label[for="classSelect"]) > label {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+/* Labels stack (text above control) like your screenshot */
+.grid:has(> label[for="classSelect"]) > label{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
 }
+/* Controls fill their column neatly (includes dates on row 2) */
+#classSelect, #medicineSelect, #formSelect, #startDate, #reviewDate{ width:100%; }
 
-/* Make the controls fill their column neatly */
-#classSelect,
-#medicineSelect,
-#formSelect,
-#startDate,
-#reviewDate {
-  width: 100%;
-}
-
-/* Responsive: at medium widths, 2 columns; small screens, 1 column */
+/* Responsive: collapse to 2 cols, then 1 */
 @media (max-width: 900px){
-  .grid:has(> label[for="classSelect"]) {
+  .grid:has(> label[for="classSelect"]){
     grid-template-columns: repeat(2, minmax(220px, 1fr));
   }
 }
 @media (max-width: 600px){
-  .grid:has(> label[for="classSelect"]) {
+  .grid:has(> label[for="classSelect"]){
     grid-template-columns: 1fr;
   }
 }
 
-select,input{background:#0b1220;color:var(--text);border:1px solid var(--border);border-radius:10px;padding:10px}
-
-.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;margin:14px 0}
-.card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-.pill{background:#0b1220;border:1px solid var(--border);border-radius:999px;padding:6px 10px;color:var(--muted)}
-
-button{background:var(--accent);border:none;color:#04121f;padding:10px 14px;border-radius:10px;cursor:pointer;font-weight:600}
-button.secondary{background:#374151;color:#e5e7eb}
-button.ghost{background:transparent;border:1px solid var(--border);color:var(--text)}
-.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-
-.dose-lines .badge{background:#1f2937;padding:4px 8px;border-radius:999px;color:#d1d5db}
-.hint{color:var(--muted);margin:6px 0 0}
-
-.table{width:100%;border-collapse:separate;border-spacing:0 8px}
-.table thead th{font-weight:600;text-align:left;padding:8px;color:#dbeafe}
-.table tbody td{background:#0b1220;border:1px solid var(--border);padding:10px;vertical-align:top}
-.table tbody tr td:first-child{border-top-left-radius:10px;border-bottom-left-radius:10px}
-.table tbody tr td:last-child{border-top-right-radius:10px;border-bottom-right-radius:10px}
-.center{text-align:center}
-.instructions-pre{white-space:pre-line}
-.output-head{display:flex;gap:10px;align-items:center;justify-content:space-between;margin-bottom:8px}
-.footer-notes { margin-top: 12px; padding-top: 8px; border-top: 1px solid #e5e5e5; }
-.class-footer  { white-space: pre-wrap; line-height: 1.35; font-size: 0.95rem; }
-
-@media (max-width:800px){
-  .grid{grid-template-columns:1fr}
-  .grid.compact{grid-template-columns:1fr}
-  .actions{flex-direction:column;align-items:flex-start}
+/* =========================================================
+   CONTROLS / CARDS / BUTTONS / BADGES
+   ========================================================= */
+select, input, textarea{
+  background:#fff;
+  color:var(--text);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:10px;
 }
-/* Taper controls: one-line "Label: [input]" pairs that wrap nicely on small screens */
+
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:14px;
+  margin:14px 0;
+}
+.card-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+
+.pill{
+  background:#f9fafb;                 /* gray-50 */
+  border:1px solid var(--border);
+  border-radius:999px;
+  padding:6px 10px;
+  color:var(--muted);
+}
+
+button{
+  background:var(--accent);
+  border:none;
+  color:#ffffff;
+  padding:10px 14px;
+  border-radius:10px;
+  cursor:pointer;
+  font-weight:600;
+}
+button.secondary{
+  background:#e5e7eb;                 /* gray-200 */
+  color:#111827;
+  border:1px solid #d1d5db;           /* gray-300 */
+}
+button.ghost{
+  background:transparent;
+  color:#111827;
+  border:1px solid #d1d5db;
+}
+.actions{ display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+
+.dose-lines .badge{
+  background:#eef2f7;                 /* light gray */
+  padding:4px 8px;
+  border-radius:999px;
+  color:#374151;
+}
+
+.hint{ color:var(--muted); margin:6px 0 0; }
+
+/* =========================================================
+   TABLES
+   ========================================================= */
+.table{ width:100%; border-collapse:separate; border-spacing:0 8px; }
+.table thead th{ font-weight:600; text-align:left; padding:8px; color:#111827; }
+.table tbody td{
+  background:#fff;
+  border:1px solid var(--border);
+  padding:10px;
+  vertical-align:top;
+}
+.table tbody tr td:first-child{ border-top-left-radius:10px; border-bottom-left-radius:10px; }
+.table tbody tr td:last-child { border-top-right-radius:10px; border-bottom-right-radius:10px; }
+
+.center{ text-align:center; }
+.instructions-pre{ white-space:pre-line; }
+.output-head{ display:flex; gap:10px; align-items:center; justify-content:space-between; margin-bottom:8px; }
+.footer-notes{ margin-top:12px; padding-top:8px; border-top:1px solid var(--border); }
+.class-footer{ white-space:pre-wrap; line-height:1.35; font-size:0.95rem; }
+
+/* =========================================================
+   TAPER CONTROLS (inline label + input pairs)
+   ========================================================= */
 .taper-row{
   display:flex;
   align-items:center;
-  flex-wrap:wrap;          /* allows wrap on small screens */
-  gap:12px 20px;           /* row gap / column gap */
+  flex-wrap:wrap;           /* allows wrap on very small screens */
+  gap:12px 20px;            /* row gap / column gap */
   margin-bottom:8px;
 }
 .inline-label{
-  display:inline-flex;    /* "Text: [input]" on one line */
+  display:inline-flex;      /* "Text: [input]" on one line */
   align-items:center;
   gap:8px;
-  white-space:nowrap;     /* keep label text on one line on wide screens */
+  white-space:nowrap;       /* keep label on one line on wide screens */
 }
 .inline-label input[type="number"]{ width:110px; }
 .inline-label .datepick{ width:170px; }
 
-/* stack pairs nicely on small screens */
+/* Small screens: allow wrapping */
 @media (max-width:700px){
   .inline-label{ white-space:normal; }
   .taper-row{ gap:12px 16px; }
 }
-/* Product picker — only affect the bubble host */
+
+/* Keep label text/spans inline with their inputs inside taper rows */
+.taper-row label,
+.taper-row span{
+  white-space:nowrap;
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+}
+/* Inputs compact so they don't force wrapping */
+.taper-row input[type="number"],
+.taper-row input[type="text"],
+.taper-row select{
+  display:inline-block;
+  width:auto;
+  min-width:84px;
+}
+
+/* =========================================================
+   PRODUCT PICKER (bubbles in shades of grey)
+   ========================================================= */
 #productPicker{
   display:flex;
   flex-wrap:wrap;
@@ -118,24 +203,29 @@ button.ghost{background:transparent;border:1px solid var(--border);color:var(--t
 }
 #productPicker .checkbox{
   display:inline-flex;
-  flex-direction:row-reverse; /* text left, checkbox right */
+  flex-direction:row-reverse;   /* text left, checkbox right */
   align-items:center;
   width:auto;
   padding:6px 8px;
   border-radius:8px;
   gap:8px;
-  background:var(--card,transparent);
-  border:1px solid var(--line,#2b3240);
+  background:#f9fafb;           /* gray-50 */
+  border:1px solid var(--line); /* gray-200 */
+  color:var(--text);
 }
 #productPicker .checkbox:hover{
-  background:var(--card-hover,rgba(255,255,255,0.04));
-  border-color:var(--line-strong,#3a4150);
+  background:#f3f4f6;           /* gray-100 */
+  border-color:var(--line-strong);
+}
+#productPicker .checkbox:has(input:checked){
+  background:#e5e7eb;           /* gray-200 */
+  border-color:#cbd5e1;         /* gray-300/400 */
 }
 #productPicker .checkbox input{
   transform:scale(0.95);
-  margin-left:6px;
+  margin-left:6px;              /* checkbox on the right */
   margin-right:0;
-  accent-color:var(--accent,#3b82f6);
+  accent-color:var(--accent);
 }
 #productPicker .checkbox span{
   font-size:0.92rem;
@@ -143,22 +233,14 @@ button.ghost{background:transparent;border:1px solid var(--border);color:var(--t
   line-height:1.15;
   white-space:nowrap;
 }
-/* Make labels & spans stay on one line next to their inputs */
-.taper-row label,
-.taper-row span{
-  white-space:nowrap;
-  display:inline-flex;
-  align-items:center;
-  gap:6px;
-}
 
-/* Inputs: keep compact so they don't push to a new line */
-.taper-row input[type="number"],
-.taper-row input[type="text"],
-.taper-row select{
-  display:inline-block;
-  width:auto;
-  min-width:84px;   /* tweak if you want tighter */
+/* =========================================================
+   RESPONSIVE (global grid fallback)
+   ========================================================= */
+@media (max-width:800px){
+  .grid{ grid-template-columns:1fr; }
+  .grid.compact{ grid-template-columns:1fr; }
+  .actions{ flex-direction:column; align-items:flex-start; }
 }
 
 /* ==============================
