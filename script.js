@@ -2887,6 +2887,110 @@ updateClassFooter();
   setDirty(true);
   setGenerateEnabled();
   if (typeof validatePatchIntervals === "function") validatePatchIntervals(false);
+/* ===================== Disclaimer gate + UI copy tweaks ===================== */
+function setupDisclaimerGate(){
+  const container = document.querySelector('.container') || document.body;
+  if (!container || document.getElementById('disclaimerCard')) return;
+
+  // Build disclaimer card
+  const card = document.createElement('div');
+  card.id = 'disclaimerCard';
+  card.className = 'card';
+  card.innerHTML = `
+    <div class="card-head"><h2>Important Notice</h2></div>
+    <div class="disclaimer-copy">
+      <p>This calculator is designed as an information tool only, and all information contained therein is solely for use by trained medical professionals who are experienced calculation of a doses of opioids based on currently published conversion factors and are competent to understand the risk, benefits and alternatives to various medicine tapering plans and determine which medicine and dosage, if any, will be safe and effective for any particular patient. Clinical application of any data obtained by use of the calculator is the sole responsibility of the user only.</p>
+      <label class="inline-label" for="acceptTaperDisclaimer">
+        <strong>Tick yes if you accept</strong>
+        <input id="acceptTaperDisclaimer" type="checkbox" />
+      </label>
+    </div>
+  `;
+
+  // Insert at the very top of the app container
+  container.insertBefore(card, container.firstChild);
+
+  // Hide everything else until accepted (remember for this session)
+  const siblings = Array.from(container.children).filter(el => el.id !== 'disclaimerCard');
+  const accepted = sessionStorage.getItem('taper_disclaimer_accepted') === '1';
+  siblings.forEach(el => el.classList.toggle('hide-until-accept', !accepted));
+
+  const cb = card.querySelector('#acceptTaperDisclaimer');
+  if (cb){
+    cb.checked = accepted;
+    cb.addEventListener('change', () => {
+      const ok = cb.checked;
+      siblings.forEach(el => el.classList.toggle('hide-until-accept', !ok));
+      sessionStorage.setItem('taper_disclaimer_accepted', ok ? '1' : '0');
+      if (ok) setTimeout(() => card.scrollIntoView({behavior:'smooth', block:'start'}), 0);
+    });
+  }
+
+  // ---- Copy tweaks (titles/labels/notes) ----
+  try {
+    // Title: "Medicine Chart Input" -> "Medicine Tapering Calculator"
+    document.querySelectorAll('.card-head h2, .card-head h3').forEach(h => {
+      if (/\bMedicine Chart Input\b/i.test(h.textContent)) h.textContent = 'Medicine Tapering Calculator';
+    });
+
+    // "Start Date" -> "Start date for tapering"
+    const sd = document.querySelector('label[for="startDate"]');
+    if (sd){
+      // If there's a nested span for the text, use it; else use the label itself
+      const tgt = sd.querySelector('span') || sd;
+      // Prefer replacing just the text part (preserve any inner controls)
+      if (tgt.firstChild && tgt.firstChild.nodeType === 3) {
+        tgt.firstChild.nodeValue = 'Start date for tapering';
+      } else {
+        tgt.textContent = 'Start date for tapering';
+      }
+    }
+
+    // "Dose lines" pill -> "Current Dosage"
+    const dl = document.querySelector('.dose-lines .badge');
+    if (dl) dl.textContent = 'Current Dosage';
+
+    // Remove the sentence: "Only Strength, Number of doses, and Frequency can be changed"
+    Array.from(document.querySelectorAll('p, .hint, .note, li')).forEach(el => {
+      if (/Only\s+Strength,\s*Number of doses,\s*and\s*Frequency\s*can\s*be\s*changed/i.test(el.textContent)) el.remove();
+    });
+
+    // Ensure line breaks for the two notes
+    const sentences = [
+      'If Phase 2 is partially complete or empty, only a single-phase tapering plan will be generated.',
+      'Plans generated will be a maximum 3 months (or review date, if earlier).'
+    ];
+    // Find any existing element that contains either sentence
+    const host = Array.from(document.querySelectorAll('.hint, .card p, .card .hint')).find(el => {
+      const t = (el.textContent || '').trim();
+      return t.includes(sentences[0]) || t.includes(sentences[1]);
+    });
+
+    if (host){
+      // Remove any combined line that had both, then re-add as separate <p> hints (below the same card)
+      const cardEl = host.closest('.card') || container;
+      // Clean out existing occurrences inside that card
+      Array.from(cardEl.querySelectorAll('p, .hint')).forEach(el => {
+        const t = (el.textContent || '').trim();
+        if (sentences.some(s => t.includes(s))) el.remove();
+      });
+      // Append them as distinct lines at the end of the card
+      sentences.forEach(s => {
+        const p = document.createElement('p');
+        p.className = 'hint';
+        p.textContent = s;
+        cardEl.appendChild(p);
+      });
+    }
+  } catch(e){ /* non-fatal */ }
+}
+
+// Run the disclaimer gate once the UI is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', setupDisclaimerGate);
+} else {
+  setupDisclaimerGate();
+}
 }
 
 document.addEventListener("DOMContentLoaded", ()=>{ try{ init(); } catch(e){ console.error(e); alert("Init error: "+(e?.message||String(e))); }});
