@@ -12,6 +12,7 @@
   <main class="container">
     <h1>Medicine Tapering Calculator</h1>
 
+    <section class="card">
     <div class="grid">
       <label>Medicine Class
         <select id="classSelect"></select>
@@ -23,17 +24,7 @@
         <select id="formSelect"></select>
       </label>
     </div>
-
-    <div class="grid">
-      <label>Start date for tapering
-        <input id="startDate" class="datepick" placeholder="Select date" />
-      </label>
-      <label>Next review date (optional)
-        <input id="reviewDate" class="datepick" placeholder="Select date" />
-      </label>
-    </div>
-
-    <section class="card">
+    
       <div class="card-head">
         <h2>Current Dosage</h2>
         <button id="addDoseLineBtn" type="button" class="secondary">Add Dose Line</button>
@@ -48,6 +39,15 @@
 <section class="card">
 <h2>Taper controls</h2>
 
+      <div class="grid">
+      <label>Start date for tapering
+        <input id="startDate" class="datepick" placeholder="Select date" />
+      </label>
+      <label>Next review date (optional)
+        <input id="reviewDate" class="datepick" placeholder="Select date" />
+      </label>
+    </div>
+  
 <div class="taper-block">
   <h3>Phase 1</h3>
   <div class="taper-row">
@@ -95,14 +95,14 @@
   <button id="clearProductSelection"  type="button" class="secondary">Clear selection</button>
 </div>
 </div>
-  
+  </section>
   <div class="actions">
     <button id="generateBtn" type="button">Generate Chart</button>
     <button id="printBtn" type="button" class="secondary">Print</button>
     <button id="savePdfBtn" type="button" class="secondary">Save as PDF…</button>
     <button id="resetBtn" type="button" class="ghost">Reset</button>
   </div>
-</section>
+
 
  <section id="outputCard" class="card output">
   <div class="output-head">
