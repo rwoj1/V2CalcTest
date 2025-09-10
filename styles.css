@@ -154,32 +154,57 @@ button.ghost{
 .inline-label{ display:inline-flex; align-items:center; gap:8px; white-space:nowrap; }
 
 /* =========================================================
-   PRODUCT PICKER (bubbles within blue cards)
+   PRODUCT PICKER — blue-tinted bubbles (match secondary buttons)
    ========================================================= */
-#productPicker{ display:flex; flex-wrap:wrap; gap:6px; align-items:flex-start; }
+#productPicker{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  align-items:flex-start;
+}
+
+/* Base bubble — same family as "Select all / Clear selection" */
 #productPicker .checkbox{
-  display:inline-flex; flex-direction:row-reverse; align-items:center;
-  width:auto; padding:6px 8px; border-radius:8px; gap:8px;
-  background:#ffffff;                      /* white chips on blue cards */
-  border:1px solid var(--line);
-  color:var(--text);
+  display:inline-flex;
+  flex-direction:row-reverse;   /* text left, checkbox right */
+  align-items:center;
+  width:auto;
+  padding:6px 8px;
+  border-radius:8px;
+  gap:8px;
+
+  /* tint like button.secondary */
+  background: color-mix(in srgb, var(--brand-500) 12%, #ffffff 88%);
+  border: 1px solid var(--brand-600);
+  color: var(--brand-900);
+
   transition: background .15s ease, border-color .15s ease;
 }
+
+/* Hover: a touch more tint */
 #productPicker .checkbox:hover{
-  background:#f7fbff;
+  background: color-mix(in srgb, var(--brand-500) 18%, #ffffff 82%);
   border-color: var(--brand-600);
 }
+
+/* Checked: slightly stronger tint + firmer border */
 #productPicker .checkbox:has(input:checked){
-  background: color-mix(in srgb, var(--brand-500) 10%, #ffffff 90%);
-  border-color: var(--brand-600);
+  background: color-mix(in srgb, var(--brand-500) 26%, #ffffff 74%);
+  border-color: var(--brand-700);
 }
+
+/* Control + text */
 #productPicker .checkbox input{
-  transform:scale(0.95);
-  margin-left:6px; margin-right:0;
+  transform: scale(0.95);
+  margin-left: 6px;  /* checkbox on the right */
+  margin-right: 0;
   accent-color: var(--brand-500);
 }
 #productPicker .checkbox span{
-  font-size:0.92rem; font-weight:500; line-height:1.15; white-space:nowrap;
+  font-size: 0.92rem;
+  font-weight: 500;
+  line-height: 1.15;
+  white-space: nowrap;
 }
 
 /* =========================================================
