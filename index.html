@@ -30,72 +30,126 @@
         <button id="addDoseLineBtn" type="button" class="secondary">Add Dose Line</button>
       </div>
       <div id="doseLinesContainer" class="dose-lines"></div>
+      
+      <!-- Antipsychotic dose panel (shown only when Class = Antipsychotic) -->
+<div id="apControls" style="display:none; margin-top: 1rem;">
+  <div class="ap-dose-grid">
+    <label class="ap-row">
+      <span>In the morning</span>
+      <input id="apDoseAM" type="number" min="0" step="0.01" value="0" /> <span>mg</span>
+    </label>
+    <label class="ap-row">
+      <span>At midday</span>
+      <input id="apDoseMID" type="number" min="0" step="0.01" value="0" /> <span>mg</span>
+    </label>
+    <label class="ap-row">
+      <span>At dinner</span>
+      <input id="apDoseDIN" type="number" min="0" step="0.01" value="0" /> <span>mg</span>
+    </label>
+    <label class="ap-row">
+      <span>At night</span>
+      <input id="apDosePM" type="number" min="0" step="0.01" value="0" /> <span>mg</span>
+    </label>
+  </div>
+  <div class="ap-total-line">
+    <span>Total:</span>
+    <span id="apTotalBox" class="ap-total-box">0 mg / 0 mg max</span>
+  </div>
+  <div class="ap-brief">
+    The total daily dose must be less than <strong id="apBriefDrug">the maximum for this medicine</strong> to be able to proceed.
+  </div>
+</div>
     </section>
 
     <section class="card">
       <div id="bestPracticeBox"></div>
     </section>
 
-<section class="card">
-<h2>Taper controls</h2>
+<section class="card" id="taperCard">
+  <h2>Taper controls</h2>
 
-      <div class="grid">
-      <label>Start date for tapering
-        <input id="startDate" class="datepick" placeholder="Select date" />
+  <!-- Dates row -->
+  <div class="grid">
+    <label>Start date for tapering
+      <input id="startDate" class="datepick" placeholder="Select date" />
+    </label>
+    <label>Next review date (optional)
+      <input id="reviewDate" class="datepick" placeholder="Select date" />
+    </label>
+  </div>
+
+  <!-- Phase 1 stays visible -->
+  <div class="taper-block">
+    <!-- Reduction order (Antipsychotic) -->
+<div id="apOrderRow" style="display:none; margin-bottom: .5rem;">
+  <div class="ap-order-label">Select which dose time to reduce first (drag and drop to reorder):</div>
+  <div id="apOrder" class="ap-order-chips" aria-label="Reduction order">
+    <button class="ap-chip" data-slot="AM"><span class="ap-badge">1</span><span class="ap-chip-label">Morning</span></button>
+    <button class="ap-chip" data-slot="MID"><span class="ap-badge">2</span><span class="ap-chip-label">Midday</span></button>
+    <button class="ap-chip" data-slot="DIN"><span class="ap-badge">3</span><span class="ap-chip-label">Dinner</span></button>
+    <button class="ap-chip" data-slot="PM"><span class="ap-badge">4</span><span class="ap-chip-label">Night</span></button>
+  </div>
+</div>
+
+    <h3>Phase 1</h3>
+    <div class="taper-row">
+      <label class="inline-label">
+        <span>Reduce by (%):</span>
+        <input id="p1Percent" type="number" min="1" max="100" placeholder="%" />
       </label>
-      <label>Next review date (optional)
-        <input id="reviewDate" class="datepick" placeholder="Select date" />
+      <label class="inline-label">
+        <span>Every (days):</span>
+        <input id="p1Interval" type="number" min="1" placeholder="days" />
       </label>
     </div>
-  
-<div class="taper-block">
-  <h3>Phase 1</h3>
-  <div class="taper-row">
-    <label class="inline-label">
-      <span>Reduce by (%):</span>
-      <input id="p1Percent" type="number" min="1" max="100" placeholder="%" />
-    </label>
-    <label class="inline-label">
-      <span>Every (days):</span>
-      <input id="p1Interval" type="number" min="1" placeholder="days" />
-    </label>
   </div>
 
-  <h3>Phase 2 <span class="muted">(optional)</span></h3>
-  <div class="taper-row">
-    <label class="inline-label">
-      <span>Start Phase 2 from:</span>
-      <input id="p2StartDate" class="datepick" placeholder="DD/MM/YYYY" />
-    </label>
-    <label class="inline-label">
-      <span>Reduce by (%):</span>
-      <input id="p2Percent" type="number" min="1" max="100" placeholder="%" />
-    </label>
-    <label class="inline-label">
-      <span>Every (days):</span>
-      <input id="p2Interval" type="number" min="1" placeholder="days" />
-    </label>
-  </div>
+  <!-- NEW: Advanced Settings accordion (everything for Phase 2 lives here) -->
+  <details id="advancedSettings" class="accordion">
+    <summary>Advanced Settings (Optional)</summary>
+    <div class="accordion-body">
 
-  <p class="hint">
-    If Phase 2 is partially complete or empty, only a single-phase taper will generate. <br>
-    Hard limit: 3 months (or review date, if earlier).
-  </p>
-</div>
+      <!-- Phase 2 (entirely inside the accordion) -->
+      <div class="taper-block">
+        <h3>Phase 2</h3>
+        <p class="hint" style="margin-top:0">
+          Phase 2 will start at the closest date after the last step of Phase 1 is complete.
+          If Phase 2 is blank or only partly set up, a single-phase taper will be generated.
+        </p>
+        <div class="taper-row">
+          <label class="inline-label">
+            <span>Start Phase 2 from:</span>
+            <input id="p2StartDate" class="datepick" placeholder="DD/MM/YYYY" />
+          </label>
+          <label class="inline-label">
+            <span>Reduce by (%):</span>
+            <input id="p2Percent" type="number" min="1" max="100" placeholder="%" />
+          </label>
+          <label class="inline-label">
+            <span>Every (days):</span>
+            <input id="p2Interval" type="number" min="1" placeholder="days" />
+          </label>
+        </div>
+      </div>
 
-<!-- Product/formulation picker (only shown for supported meds) -->
-<div id="productPickerCard" class="card-subtle" style="display:none;margin-top:12px">
-  <h3 style="margin:0 0 6px 0;">Select formulations to use in the taper (optional)</h3>
-  <p class="hint" style="margin-top:0">
-    Select the commercial products to generate a tapering plan. If none are selected, all products will be used.
-  </p>
-  <div id="productPicker" class="product-grid"></div>
- <div class="taper-row" style="gap:8px; margin-top:8px;">
-  <button id="selectAllProductSelection" type="button" class="secondary">Select all</button>
-  <button id="clearProductSelection"  type="button" class="secondary">Clear selection</button>
-</div>
-</div>
-  </section>
+      <!-- Product/formulation picker: moved inside the accordion, above Mode -->
+      <div id="productPickerCard" class="card-subtle" style="display:none; margin-top:8px;">
+        <h3 style="margin:0 0 6px 0;">Select formulations to use in the taper (optional)</h3>
+        <p class="hint" style="margin-top:0">
+          Select the commercial products to generate a tapering plan.<br>
+          If none are selected, all products will be used.
+        </p>
+        <div id="productPicker" class="product-grid"></div>
+        <div class="taper-row" style="gap:8px; margin-top:8px;">
+          <button id="selectAllProductSelection" type="button" class="secondary">Select all</button>
+          <button id="clearProductSelection"  type="button" class="secondary">Clear selection</button>
+        </div>
+      </div>
+
+    </div>
+  </details>
+</section>
+
   <div class="actions">
     <button id="generateBtn" type="button">Generate Chart</button>
     <button id="printBtn" type="button" class="secondary">Print</button>
