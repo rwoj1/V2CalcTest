@@ -80,17 +80,6 @@
 
   <!-- Phase 1 stays visible -->
   <div class="taper-block">
-    <!-- Reduction order (Antipsychotic) -->
-<div id="apOrderRow" style="display:none; margin-bottom: .5rem;">
-  <div class="ap-order-label">Select which dose time to reduce first (drag and drop to reorder):</div>
-  <div id="apOrder" class="ap-order-chips" aria-label="Reduction order">
-    <button class="ap-chip" data-slot="AM"><span class="ap-badge">1</span><span class="ap-chip-label">Morning</span></button>
-    <button class="ap-chip" data-slot="MID"><span class="ap-badge">2</span><span class="ap-chip-label">Midday</span></button>
-    <button class="ap-chip" data-slot="DIN"><span class="ap-badge">3</span><span class="ap-chip-label">Dinner</span></button>
-    <button class="ap-chip" data-slot="PM"><span class="ap-badge">4</span><span class="ap-chip-label">Night</span></button>
-  </div>
-</div>
-
     <h3>Phase 1</h3>
     <div class="taper-row">
       <label class="inline-label">
@@ -104,6 +93,17 @@
     </div>
   </div>
 
+      <!-- Reduction order (Antipsychotic) -->
+<div id="apOrderRow" style="display:none; margin-bottom: .5rem;">
+  <div class="ap-order-label">Select which dose time to reduce first (drag and drop to reorder):</div>
+  <div id="apOrder" class="ap-order-chips" aria-label="Reduction order">
+    <button class="ap-chip" data-slot="AM"><span class="ap-badge">1</span><span class="ap-chip-label">Morning</span></button>
+    <button class="ap-chip" data-slot="MID"><span class="ap-badge">2</span><span class="ap-chip-label">Midday</span></button>
+    <button class="ap-chip" data-slot="DIN"><span class="ap-badge">3</span><span class="ap-chip-label">Dinner</span></button>
+    <button class="ap-chip" data-slot="PM"><span class="ap-badge">4</span><span class="ap-chip-label">Night</span></button>
+  </div>
+</div>
+  
   <!-- NEW: Advanced Settings accordion (everything for Phase 2 lives here) -->
   <details id="advancedSettings" class="accordion">
     <summary>Advanced Settings (Optional)</summary>
