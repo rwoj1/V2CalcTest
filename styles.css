@@ -340,6 +340,16 @@ button.ghost{
 #apOrder .ap-chip{ cursor:grab; }
 #apOrder .ap-chip.dragging{ opacity:.6; cursor:grabbing; }
 
+/* === Show Calculations — minimal extras === */
+.calc-toggle { margin-left: 6px; }
+#calcBlock h3 { margin: 0 0 8px 0; }
+
+
+/* Reuse plan-table visuals */
+.calc-table { width: 100%; }
+.calc-table th, .calc-table td { white-space: nowrap; }
+.calc-table .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.calc-table .wrap { white-space: normal; }
 
 /* ==============================
    PRINT / PDF rules
