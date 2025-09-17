@@ -283,33 +283,12 @@ function strengthsForPicker(){
   return strengthsForSelected().slice().sort((a,b)=>parseMgFromStrength(a)-parseMgFromStrength(b));
 }
 
-// Selection-aware strengths used by allowedPiecesMg/lowestStepMg
+// Filtered bases depending on checkbox selection (empty => all)
 function allowedStrengthsFilteredBySelection(){
-  // All strengths for current class/med/form (numeric mg)
-  const all = (typeof strengthsForSelected === 'function'
-    ? strengthsForSelected().map(parseMgFromStrength).filter(v => v > 0)
-    : []);
-
-  // If nothing explicitly selected, use all
-  if (!window.SelectedFormulations || window.SelectedFormulations.size === 0) return all;
-
-  // Normalize the selection set into numeric mg first
-  const selMg = new Set(Array.from(window.SelectedFormulations)
-    .map(v => {
-      if (typeof v === 'number') return v;
-      if (typeof parseMgFromStrength === 'function') {
-        const x = parseMgFromStrength(v);
-        if (Number.isFinite(x) && x > 0) return x;
-      }
-      const m = String(v).match(/([\d.]+)/);
-      return m ? Number(m[1]) : NaN;
-    })
-    .filter(n => Number.isFinite(n) && n > 0));
-
-  // Keep only selected strengths
-  return all.filter(mg => selMg.has(mg));
+  const all = strengthsForSelected().map(parseMgFromStrength).filter(v=>v>0);
+  if (!SelectedFormulations || SelectedFormulations.size === 0) return all;
+  return all.filter(mg => SelectedFormulations.has(mg));
 }
-
 // Returns the mg list to use for the step size: if user selected formulations, use those;
 // otherwise use all available strengths for the current selection.
 function stepBaseStrengthsMg(cls, med, form){
