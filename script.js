@@ -2518,18 +2518,30 @@ function composeForSlot_AP_Selected(targetMg, cls, med, form){
 
 /* ===== Preferred BID split ===== */
 function preferredBidTargets(total, cls, med, form){
-  const step = lowestStepMg(cls,med,form) || 1;
-  const half = roundTo(total/2, step);
-  let am = Math.min(half, total-half);
-  let pm = total - am;
-  am = roundTo(am, step); pm = roundTo(pm, step);
-  if(am+pm !== total){
-    const diff = total - (am+pm);
-    pm = roundTo(pm+diff, step);
-    if(am>pm){ const t=am; am=pm; pm=t; }
-  }
-  return {AM:am, PM:pm};
+  const EPS  = 1e-9;
+  const step = (typeof lowestStepMg === "function" ? lowestStepMg(cls, med, form) : 1) || 1;
+
+  // Snap total to the grid once (selection-aware)
+  total = Math.max(0, Math.round(total / step) * step);
+
+  // Base even split on the grid
+  let am = Math.floor((total / 2) / step) * step;  // floor half on the grid
+  let pm = total - am;                             // remainder to PM (so PM >= AM)
+
+  // Snap PM to grid (guard tiny float noise), recompute AM as the remainder
+  pm = Math.round(pm / step) * step;
+  am = total - pm;
+
+  // Clean tiny negatives
+  if (am < EPS) am = 0;
+  if (pm < EPS) pm = 0;
+
+  // Prefer PM >= AM; swap if needed
+  if (am > pm) { const t = am; am = pm; pm = t; }
+
+  return { AM: am, PM: pm };
 }
+
 
 /* ===== Opioids (tablets/capsules) — shave DIN→MID, then rebalance BID ===== */
 function stepOpioid_Shave(packs, percent, cls, med, form){
@@ -3834,6 +3846,206 @@ if (/Oxycodone\s*\/\s*Naloxone/i.test(r.med)) {
 
   return rows;
 }
+/* =============================================================
+SHOW CALCULATIONS — logger + renderer (no recalculation)
+Hooks into renderStandardTable/renderPatchTable
+============================================================= */
+(function () {
+  const EPS = 1e-6;
+
+  const calcLogger = {
+    rows: [],
+    clear(){ this.rows = []; },
+
+    // Build from the same rows that renderers use (no new math)
+    buildFromRows(stepRows){
+      this.clear();
+
+      const cls  = document.getElementById("classSelect")?.value || "";
+      const med  = document.getElementById("medicineSelect")?.value || "";
+      const form = document.getElementById("formSelect")?.value || "";
+
+      const p1Pct = num(document.getElementById("p1Percent")?.value);
+      const p2Pct = num(document.getElementById("p2Percent")?.value);
+      const p2Int = Math.max(0, parseInt(document.getElementById("p2Interval")?.value || "", 10));
+      const p2StartInput = document.getElementById("p2StartDate");
+      const p2Start = (p2Pct > 0 && p2Int > 0 && p2StartInput)
+        ? (p2StartInput._flatpickr?.selectedDates?.[0] || (p2StartInput.value ? new Date(p2StartInput.value) : null))
+        : null;
+
+      const unit = /Patch/i.test(form) ? "mcg/h" : "mg";
+
+      // Derive starting total from current inputs (no recomputation of future rows)
+      let prevTotal = 0;
+      if (cls === "Antipsychotic" && typeof window.apSeedPacksFromFourInputs === "function") {
+        prevTotal = safePacksTotalMg(window.apSeedPacksFromFourInputs() || {});
+      } else if (/Patch/i.test(form)) {
+        prevTotal = sumPatchesFromDoseLines();
+      } else if (typeof window.buildPacksFromDoseLines === "function") {
+        prevTotal = safePacksTotalMg(window.buildPacksFromDoseLines() || {});
+      }
+
+      (stepRows || []).forEach((row) => {
+        if (row.stop || row.review) return; // skip non-dose rows
+
+        const dateStr   = row.dateStr || row.date || row.when || "";
+        const cfgPct    = pickConfiguredPercentForDate(dateStr, p1Pct, p2Pct, p2Start);
+        const rawTarget = prevTotal * (1 - (cfgPct / 100)); // informational (unrounded)
+
+        // Chosen total comes from the rendered row itself
+        let chosen = 0;
+        if (/Patch/i.test(form) || row.patches) {
+          chosen = sumPatches(Array.isArray(row.patches) ? row.patches : []);
+        } else {
+          chosen = safePacksTotalMg(row.packs);
+        }
+
+        const actualPct = prevTotal > EPS ? (100 * (1 - (chosen / prevTotal))) : 0;
+
+        this.rows.push({
+          step: this.rows.length + 1,
+          date: dateStr,
+          target: rawTarget,
+          cfgPct,
+          chosen,
+          unit,
+          actualPct
+        });
+
+        prevTotal = chosen; // advance for next step’s comparisons
+      });
+    },
+
+    render(){
+      const hostCard  = document.getElementById("calcBlock");
+      const hostTable = document.getElementById("calcTableHost");
+      const checked   = document.getElementById("showCalc")?.checked;
+      if (!hostCard || !hostTable) return;
+
+      if (!checked || !this.rows.length) {
+        hostCard.style.display = "none";
+        hostTable.innerHTML = "";
+        return;
+      }
+
+      const tbl   = document.createElement("table");
+      tbl.className = "plan-table calc-table";
+
+      const thead = document.createElement("thead");
+      const trh   = document.createElement("tr");
+      [
+        "Step",
+        "Date",
+        "Calculated Dose",
+        "Selected % Change",
+        "Rounded Dose",
+        "Actual % Change"
+      ].forEach(h => { const th = document.createElement("th"); th.textContent = h; trh.appendChild(th); });
+      thead.appendChild(trh);
+      tbl.appendChild(thead);
+
+      const tbody = document.createElement("tbody");
+      this.rows.forEach(r => {
+        const tr = document.createElement("tr");
+        tr.appendChild(td(r.step));
+        tr.appendChild(td(r.date || ""));
+        tr.appendChild(td(fmtQty(r.target, r.unit), "mono"));
+        tr.appendChild(td(stripZeros(+r.cfgPct) + "%"));
+        tr.appendChild(td(fmtQty(r.chosen, r.unit), "mono"));
+        tr.appendChild(td(stripZeros(+r.actualPct.toFixed(1)) + "%"));
+        tbody.appendChild(tr);
+      });
+      tbl.appendChild(tbody);
+
+      hostTable.innerHTML = "";
+      hostTable.appendChild(tbl);
+      hostCard.style.display = "";
+    }
+  };
+
+  // ---------- helpers ----------
+  function num(v){ const n = parseFloat(v ?? ""); return isFinite(n) ? n : 0; }
+
+  function stripZeros(n){
+    if (typeof window.stripZeros === "function") return window.stripZeros(n);
+    if (Number.isInteger(n)) return String(n);
+    return String(n).replace(/(\.\d*?[1-9])0+$/,"$1").replace(/\.0+$/,"");
+  }
+
+  function fmtQty(n, unit){
+    const val = Math.abs(n) < EPS ? 0 : +(+n).toFixed(2);
+    return `${stripZeros(val)} ${unit}`;
+  }
+
+  function safePacksTotalMg(p){
+    try{
+      if (typeof window.packsTotalMg === "function") return window.packsTotalMg(p || {});
+      const s = k => Object.entries((p||{})[k]||{}).reduce((a,[mg,c]) => a + (+mg)*(+c||0), 0);
+      return s("AM")+s("MID")+s("DIN")+s("PM");
+    } catch { return 0; }
+  }
+
+  function sumPatchesFromDoseLines(){
+    let total = 0;
+    (window.doseLines || []).forEach(ln => {
+      const rate = (typeof window.parsePatchRate === "function")
+        ? (window.parsePatchRate(ln.strengthStr) || 0)
+        : parseFloat(ln.strengthStr) || 0;
+      const qty = Math.max(0, Math.floor(ln.qty ?? 0));
+      total += rate * qty;
+    });
+    return total;
+  }
+
+  function sumPatches(list){
+    try { return (list || []).reduce((s, p) => s + ((+p.rate) || 0), 0); }
+    catch { return 0; }
+  }
+
+  function pickConfiguredPercentForDate(dateStr, p1Pct, p2Pct, p2Start){
+    if (!(p2Start instanceof Date) || !(p2Pct > 0)) return p1Pct;
+    try { const dt = new Date(dateStr); if (isFinite(+dt) && +dt >= +p2Start) return p2Pct; } catch {}
+    return p1Pct;
+  }
+
+  function td(text, cls){ const el = document.createElement("td"); if (cls) el.className = cls; el.textContent = text; return el; }
+
+  // ---------- wrap existing renderers ----------
+  const _renderStd   = (typeof window.renderStandardTable === "function") ? window.renderStandardTable : null;
+  if (_renderStd){
+    window.renderStandardTable = function(rows){
+      try { calcLogger.buildFromRows(rows); } catch {}
+      const rv = _renderStd.apply(this, arguments);
+      try { if (document.getElementById("showCalc")?.checked) calcLogger.render(); } catch {}
+      return rv;
+    };
+  }
+
+  const _renderPatch = (typeof window.renderPatchTable === "function") ? window.renderPatchTable : null;
+  if (_renderPatch){
+    window.renderPatchTable = function(rows){
+      try { calcLogger.buildFromRows(rows); } catch {}
+      const rv = _renderPatch.apply(this, arguments);
+      try { if (document.getElementById("showCalc")?.checked) calcLogger.render(); } catch {}
+      return rv;
+    };
+  }
+
+  // ---------- checkbox toggle ----------
+  function wireCalcToggle(){
+    const el = document.getElementById("showCalc");
+    if (!el) return;
+    el.addEventListener("change", () => {
+      const hostCard = document.getElementById("calcBlock");
+      if (el.checked) { try { calcLogger.render(); } catch {} }
+      else if (hostCard) { hostCard.style.display = "none"; }
+    });
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", wireCalcToggle);
+  else                                   wireCalcToggle();
+})();
+
+
 
 /* =================== Build & init =================== */
 
