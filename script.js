@@ -4225,7 +4225,11 @@ function setupDisclaimerGate(){
   card.innerHTML = `
     <div class="card-head"><h2>Important Notice</h2></div>
     <div class="disclaimer-copy">
-      <p>This calculator is designed as an information tool only, and all information contained is solely for the use by a trained medical professional who is experienced in tapering medicines based on currently published evidence and are competent to understand the risk, benefits and alternatives to various medicine tapering plans and determine which medicine and dosage, if any, will be safe and effective for any particular patient. Clinical application of any data obtained by use of the calculator is the sole responsibility of the user only.</p>
+      <p>This calculator and its associated content therein are intended exclusively for use by qualified medical professionals. It is designed to support deprescribing, where this is deemed clinically appropriate by the prescriber.
+This calculator does not replace professional clinical judgment. The interpretation and application of any information obtained from this calculator remain the sole responsibility of the user.
+By accessing and using this site, you acknowledge and agree to the following:
+·         You will exercise your own independent clinical judgement when treating patients.
+·         You accept and agree to these terms and conditions.</p>
       <label class="inline-label" for="acceptTaperDisclaimer">
         <strong>Check the box if you accept</strong>
         <input id="acceptTaperDisclaimer" type="checkbox" />
