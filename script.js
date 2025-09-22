@@ -1498,19 +1498,21 @@ const SUGGESTED_PRACTICE = {
 • Long-term opioid use (e.g. 1> year) or on high doses: slower tapering and frequent monitoring
 [INSERT ALGORITHM]  [INSERT SUMMARY OF EVIDENCE] [INSERT GUIDE TO RULESET]`,
 
-  bzra: `• Taper slowly with the patient; e.g., 25% every 2 weeks.
-• Near end: consider 12.5% reductions and/or planned drug-free days.
+  bzra: `Tailor the deprescribing plan based on the person’s clinical characteristics, goals and preferences:
+•	Taper slowly; e.g., 25% every 2 weeks.
+•	Near end: consider 12.5% reductions and/or planned drug-free days.
 [INSERT ALGORITHM]  [INSERT SUMMARY OF EVIDENCE] [INSERT GUIDE TO RULESET]`,
 
   antipsychotic: `• Reduce ~25–50% every 1–2 weeks with close monitoring.
 • Slower taper may be appropriate depending on symptoms.
 [INSERT ALGORITHM]  [INSERT SUMMARY OF EVIDENCE] [INSERT GUIDE TO RULESET]`,
 
-  gabapentinoids: `• Reduce X% every Y weeks with close monitoring
+  gabapentinoids: `• Reduce X% every Y weeks with close monitoring 
 [INSERT ALGORITHM]  [INSERT SUMMARY OF EVIDENCE] [INSERT GUIDE TO RULESET]`,
   
-  ppi: `• Step-down to lowest effective dose, alternate-day dosing, or stop and use on-demand.
-• Review at 4–12 weeks.
+  ppi: `•	Reduce dose by 50% every 1-2 weeks 
+•	Step-down to lowest effective dose, alternate-day dosing, or stop and use on-demand.
+•	Review at 4–12 weeks.
 [INSERT ALGORITHM]  [INSERT SUMMARY OF EVIDENCE]   [INSERT GUIDE TO RULESET]`,
 };
 
