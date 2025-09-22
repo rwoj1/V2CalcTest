@@ -4229,6 +4229,7 @@ function setupDisclaimerGate(){
     <div class="disclaimer-copy">
       <p>This calculator and its associated content therein are intended exclusively for use by qualified medical professionals. It is designed to support deprescribing, where this is deemed clinically appropriate by the prescriber.
 This calculator does not replace professional clinical judgment. The interpretation and application of any information obtained from this calculator remain the sole responsibility of the user.
+
 By accessing and using this site, you acknowledge and agree to the following:
 ·         You will exercise your own independent clinical judgement when treating patients.
 ·         You accept and agree to these terms and conditions.</p>
