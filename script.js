@@ -1519,16 +1519,17 @@ const SUGGESTED_PRACTICE = {
 // ---- Class-specific footer copy (placeholder text) ----
 const CLASS_FOOTER_COPY = {
   opioids: "Insert specific footer + disclaimer for Opioids",
-
-  bzra: `
+bzra: `
 <strong>Talk to your doctor, pharmacist or nurse before making any changes to your medicine.</strong>
-They can help you plan and monitor your dose reduction safely.<br>
-<strong>Discuss the following with your doctor, pharmacist or nurse:</strong><br>
-• Other strategies to help manage your insomnia<br>
-• Regular review and follow-up appointments<br>
-• Your support network<br>
-• Plans to prevent and manage withdrawal symptoms if you get any – these are temporary and usually mild (e.g. sleeplessness, anxiety, restlessness).<br>
-<strong>Additional Notes:</strong><br>
+They can help you plan and monitor your dose reduction safely.
+<strong>Discuss the following with your doctor, pharmacist or nurse:</strong>
+<ul class="footer-list">
+  <li>Other strategies to help manage your insomnia</li>
+  <li>Regular review and follow-up appointments</li>
+  <li>Your support network</li>
+  <li>Plans to prevent and manage withdrawal symptoms if you get any – these are temporary and usually mild (e.g. sleeplessness, anxiety, restlessness).</li>
+</ul>
+<strong>Additional Notes:</strong>
 <textarea></textarea>
 <em>This information is not intended as a substitute for medical advice and should not be exclusively relied on to diagnose or manage a medical condition. Monash University disclaims all liability (including for negligence) for any loss, damage or injury resulting from reliance on or use of this information.</em>
 `,
