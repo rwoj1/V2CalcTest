@@ -1565,10 +1565,10 @@ function footerKeyFromLabel(label) {
 
 function updateClassFooter() {
   const cls = document.getElementById("classSelect")?.value || "";
-  const key = mapClassToKey(cls);                     // "opioids" | "bzra" | "antipsychotic" | "ppi" | null
-  const text = (key && CLASS_FOOTER_COPY[key]) || CLASS_FOOTER_COPY._default;
+  const key = mapClassToKey(cls); // "opioids" | "bzra" | "antipsychotic" | "ppi" | null
+  const html = (key && CLASS_FOOTER_COPY[key]) || CLASS_FOOTER_COPY._default;
   const target = document.getElementById("classFooter");
-  if (target) target.textContent = text;
+  if (target) target.innerHTML = html;  // ← was textContent
 }
 
 let _lastPracticeKey = null;
