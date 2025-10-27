@@ -570,3 +570,38 @@ button.ghost{
 .table thead { display: table-header-group !important; }
 
 }
+
+/* ====== Output Footer Styling ====== */
+.class-footer {
+  font-size: 0.92rem;           /* matches table text size */
+  color: var(--text);
+  line-height: 1.45;
+  margin-top: 10px;
+}
+
+.class-footer strong {
+  color: var(--brand-900);
+  font-weight: 600;
+}
+
+.class-footer em {
+  display: block;
+  margin-top: 8px;
+  font-size: 0.8rem;           /* smaller disclaimer text */
+  color: var(--muted);         /* grey tone to de-emphasize */
+  line-height: 1.4;
+}
+
+.class-footer textarea {
+  display: block;
+  width: 100%;
+  min-height: 80px;
+  margin-top: 6px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 8px 10px;
+  font: inherit;
+  background: #fff;
+  resize: vertical;
+}
+
