@@ -627,3 +627,10 @@ button.ghost{
 .class-footer .footer-list { margin: .2em 0 .6em 1.2em; padding: 0; }
 .class-footer .footer-list li { margin: .2em 0; }
 
+/* ensure bold text stays bold in print/PDF */
+@media print {
+  .class-footer strong {
+    font-weight: 700 !important;
+    color: #000 !important; /* prevent pale or grey text when printing */
+  }
+}
