@@ -571,37 +571,49 @@ button.ghost{
 
 }
 
-/* ====== Output Footer Styling ====== */
 .class-footer {
-  font-size: 0.92rem;           /* matches table text size */
+  font-size: 0.92rem;
   color: var(--text);
   line-height: 1.45;
   margin-top: 10px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
 }
 
+/* Tighter and cleaner spacing between sections */
 .class-footer strong {
+  display: block;
   color: var(--brand-900);
   font-weight: 600;
+  margin-top: 0.6em;
+  margin-bottom: 0.2em;
 }
 
-.class-footer em {
-  display: block;
-  margin-top: 8px;
-  font-size: 0.8rem;           /* smaller disclaimer text */
-  color: var(--muted);         /* grey tone to de-emphasize */
-  line-height: 1.4;
+.class-footer br + strong {
+  margin-top: 0.8em;
 }
 
 .class-footer textarea {
   display: block;
   width: 100%;
   min-height: 80px;
-  margin-top: 6px;
   border: 1px solid var(--border);
   border-radius: 10px;
   padding: 8px 10px;
   font: inherit;
   background: #fff;
   resize: vertical;
+  margin-top: 0.4em;
+  margin-bottom: 0.8em;
 }
+
+.class-footer em {
+  display: block;
+  font-size: 0.8rem;     /* smaller disclaimer text */
+  color: var(--muted);
+  line-height: 1.4;
+}
+
 
