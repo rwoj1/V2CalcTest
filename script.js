@@ -1518,7 +1518,20 @@ const SUGGESTED_PRACTICE = {
 
 // ---- Class-specific footer copy (placeholder text) ----
 const CLASS_FOOTER_COPY = {
-  opioids: "Insert specific footer + disclaimer for Opioids",
+    opioids: `
+<strong>Talk to your doctor, pharmacist or nurse before making any changes to your medicine.</strong>
+They can help you plan and monitor your dose reduction safely.<br>
+If you are taking a short-acting or “when required” opioid, confirm with your healthcare professional which dose to continue during each reduction step.<br>
+Your tolerance to opioids will reduce as your dose reduces. This means you are at risk of overdosing if you quickly return to your previous high doses of opioids. Naloxone is a freely available medication that reverses the effects of opioids and may save your life if you have a severe opioid reaction. For more information, see <a href="https://saferopioiduse.com.au" target="_blank">The Opioid Safety Toolkit</a>.<br>
+<strong>Discuss the following with your doctor, pharmacist or nurse:</strong><br>
+• Other strategies to help manage your pain<br>
+• Regular review and follow-up appointments<br>
+• Your support network<br>
+• Plans to prevent and manage withdrawal symptoms if you get any – these are temporary and usually mild (e.g. flu-like symptoms, nausea, diarrhoea, stomach aches).<br>
+<strong>Additional Notes:</strong><br>
+<textarea></textarea>
+<em>This information is not intended as a substitute for medical advice and should not be exclusively relied on to diagnose or manage a medical condition. Monash University disclaims all liability (including for negligence) for any loss, damage or injury resulting from reliance on or use of this information.</em>
+`,
 bzra: `
 <strong>Talk to your doctor, pharmacist or nurse before making any changes to your medicine.</strong>
 They can help you plan and monitor your dose reduction safely.
