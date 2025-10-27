@@ -578,11 +578,7 @@ button.ghost{
 }
 
 /* add vertical rhythm between paragraph-like chunks */
-.class-footer br {
-  display: block;
-  margin-top: 0.6em;   /* small gap after a <br> */
-  content: "";
-}
+.class-footer br { display:block; margin-top:.6em; content:""; }
 
 /* list styling for consistency */
 .class-footer .footer-list {
