@@ -1520,18 +1520,16 @@ const SUGGESTED_PRACTICE = {
 const CLASS_FOOTER_COPY = {
   opioids:       "Insert specific footer + disclaimer for Opioids",
   bzra:
-      bzra: `
-<strong>Talk to your doctor, pharmacist or nurse before making any changes to your medicine.</strong>
-They can help you plan and monitor your dose reduction safely.<br><br>
-<strong>Discuss the following with your doctor, pharmacist or nurse:</strong><br>
-• Other strategies to help manage your insomnia<br>
-• Regular review and follow-up appointments<br>
-• Your support network<br>
-• Plans to prevent and manage withdrawal symptoms if you get any – these are temporary and usually mild (e.g. sleeplessness, anxiety, restlessness).<br><br>
-<strong>Additional Notes:</strong><br>
-<textarea style="width:100%;min-height:80px;border:1px solid #dbe9f5;border-radius:8px;padding:8px;"></textarea><br><br>
-<em>This information is not intended as a substitute for medical advice and should not be exclusively relied on to diagnose or manage a medical condition. Monash University disclaims all liability (including for negligence) for any loss, damage or injury resulting from reliance on or use of this information.</em>
-`,
+'<strong>Talk to your doctor, pharmacist or nurse before making any changes to your medicine.</strong>'
+'They can help you plan and monitor your dose reduction safely.<br><br>'
+'<strong>Discuss the following with your doctor, pharmacist or nurse:</strong><br>'
+'• Other strategies to help manage your insomnia<br>'
+'• Regular review and follow-up appointments<br>'
+'• Your support network<br>'
+'• Plans to prevent and manage withdrawal symptoms if you get any – these are temporary and usually mild (e.g. sleeplessness, anxiety, restlessness).<br><br>'
+'<strong>Additional Notes:</strong><br>'
+'<textarea style="width:100%;min-height:80px;border:1px solid #dbe9f5;border-radius:8px;padding:8px;"></textarea><br><br>'
+'<em>This information is not intended as a substitute for medical advice and should not be exclusively relied on to diagnose or manage a medical condition. Monash University disclaims all liability (including for negligence) for any loss, damage or injury resulting from reliance on or use of this information.</em>`,
   antipsychotic: "Insert specific footer + disclaimer for Antipsychotics",
   ppi:           "Insert specific footer + disclaimer for Proton Pump Inhibitors",
   gabapentinoids: "Insert specific footer + disclaimer for Gabapentinoids",
