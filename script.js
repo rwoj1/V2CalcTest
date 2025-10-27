@@ -1518,13 +1518,11 @@ const SUGGESTED_PRACTICE = {
 
 // ---- Class-specific footer copy (placeholder text) ----
 const CLASS_FOOTER_COPY = {
-    opioids: `
-<strong>Talk to your doctor, pharmacist or nurse before making any changes to your medicine.</strong>
-They can help you plan and monitor your dose reduction safely.<br>
-
-If you are taking a short-acting or “when required” opioid, confirm with your healthcare professional which dose to continue during each reduction step.<br>
-Your tolerance to opioids will reduce as your dose reduces. This means you are at risk of overdosing if you quickly return to your previous high doses of opioids. Naloxone is a freely available medication that reverses the effects of opioids and may save your life if you have a severe opioid reaction. For more information, see <a href="https://saferopioiduse.com.au" target="_blank">The Opioid Safety Toolkit</a>.<br>
-
+opioids: `
+<p><strong>Talk to your doctor, pharmacist or nurse before making any changes to your medicine.</strong>
+They can help you plan and monitor your dose reduction safely.</p>
+<p>If you are taking a short-acting or “when required” opioid, confirm with your healthcare professional which dose to continue during each reduction step.</p>
+<p>Your tolerance to opioids will reduce as your dose reduces. This means you are at risk of overdosing if you quickly return to your previous high doses of opioids. Naloxone is a freely available medication that reverses the effects of opioids and may save your life if you have a severe opioid reaction. For more information, see <a href="https://saferopioiduse.com.au" target="_blank">The Opioid Safety Toolkit</a>.</p>
 <strong>Discuss the following with your doctor, pharmacist or nurse:</strong>
 <ul class="footer-list">
   <li>Other strategies to help manage your pain</li>
