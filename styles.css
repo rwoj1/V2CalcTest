@@ -222,7 +222,6 @@ button.ghost{
 
 .output-head{ display:flex; gap:10px; align-items:center; justify-content:space-between; margin-bottom:8px; }
 .footer-notes{ margin-top:12px; padding-top:8px; border-top:1px solid var(--border); }
-.class-footer{ white-space:pre-wrap; line-height:1.35; font-size:0.95rem; color:var(--text); }
 
 /* Show each instruction on its own line */
 .instructions-pre {
@@ -245,11 +244,6 @@ button.ghost{
 /* ===== Disclaimer gate ===== */
 .hide-until-accept{ display:none !important; }
 
-#disclaimerCard .disclaimer-copy{
-  white-space: pre-wrap;
-  line-height: 1.45;
-  color: var(--text);
-}
 #disclaimerCard .disclaimer-copy p{ margin: 0 0 10px; }
 #disclaimerCard .inline-label{
   display: inline-flex;
